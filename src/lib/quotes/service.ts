@@ -201,14 +201,21 @@ export async function upsertQuoteForTradesman(params: {
     };
   });
 
-  await createNotification({
-    userId: quoteRequest.customerId,
-    type: NotificationType.QUOTE_REQUEST,
-    title: "새 견적이 도착했습니다",
-    message: `${tradesman.fullName} 전문가가 ${quoteRequest.title} 요청에 견적을 보냈습니다.`,
-    relatedId: quoteRequest.id,
-    relatedType: NotificationRelatedType.QUOTE_REQUEST,
-  });
+  try {
+    await createNotification({
+      userId: quoteRequest.customerId,
+      type: NotificationType.QUOTE_REQUEST,
+      title: "새 견적이 도착했습니다",
+      message: `${tradesman.fullName} 전문가가 ${quoteRequest.title} 요청에 견적을 보냈습니다.`,
+      relatedId: quoteRequest.id,
+      relatedType: NotificationRelatedType.QUOTE_REQUEST,
+    });
+  } catch (error) {
+    // 견적 저장과 크레딧 차감은 이미 성공한 상태다.
+    // 알림만 실패했다고 사용자에게 "견적 제출 실패"로 보이면 중복 재시도를 부를 수 있으므로,
+    // 서버 로그만 남기고 견적 제출 자체는 성공으로 응답한다.
+    console.error("QUOTE_NOTIFICATION_FAILED", error);
+  }
 
   return {
     quote,

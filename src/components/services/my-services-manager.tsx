@@ -6,7 +6,6 @@ import type { Locale, ManagedServiceItem } from "@/lib/types";
 
 interface MyServicesManagerProps {
   locale: Locale;
-  sessionToken: string;
   ownerName: string;
   initialItems: ManagedServiceItem[];
 }
@@ -29,7 +28,7 @@ interface ServiceFormErrors {
 interface MyServicesText {
   panelTitle: string;
   panelDescription: string;
-  browserSaveNotice: string;
+  serverSaveNotice: string;
   addAction: string;
   editAction: string;
   disableAction: string;
@@ -74,8 +73,8 @@ function getMyServicesText(locale: Locale): MyServicesText {
       panelTitle: "Pamamahalaan ang mga serbisyong ipinapakita sa customer",
       panelDescription:
         "Dito puwedeng magdagdag, mag-edit, at pansamantalang itago ang serbisyo.",
-      browserSaveNotice:
-        "Pansamantala itong sine-save sa browser. Ikokonekta ito sa DB API sa susunod na hakbang.",
+      serverSaveNotice:
+        "Naka-save ito sa server, kaya mananatili kahit i-refresh ang page.",
       addAction: "Magdagdag ng serbisyo",
       editAction: "I-edit",
       disableAction: "Itago",
@@ -113,8 +112,8 @@ function getMyServicesText(locale: Locale): MyServicesText {
       panelTitle: "Manage the services customers can see",
       panelDescription:
         "This is where the tradesman adds, edits, and temporarily hides services.",
-      browserSaveNotice:
-        "Changes are temporarily saved in this browser. The next step is connecting this to the DB API.",
+      serverSaveNotice:
+        "Changes are saved to the server, so they stay after refresh.",
       addAction: "Add service",
       editAction: "Edit",
       disableAction: "Hide",
@@ -151,8 +150,8 @@ function getMyServicesText(locale: Locale): MyServicesText {
     panelTitle: "고객에게 보여 줄 서비스를 여기서 직접 관리합니다",
     panelDescription:
       "전문가가 이 화면에서 서비스 등록, 수정, 숨김 전환까지 바로 할 수 있는 구조입니다.",
-    browserSaveNotice:
-      "현재는 이 브라우저에 임시 저장됩니다. 다음 단계에서 DB 저장 API로 연결해야 합니다.",
+    serverSaveNotice:
+      "이제 서버 DB에 저장됩니다. 새로고침해도 서비스 목록이 유지됩니다.",
     addAction: "새 서비스 등록",
     editAction: "수정",
     disableAction: "끄기",
@@ -185,15 +184,6 @@ function getMyServicesText(locale: Locale): MyServicesText {
   };
 }
 
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
-
 function parseTags(tagsText: string) {
   return tagsText
     .split(",")
@@ -209,51 +199,21 @@ function normalizeInitialItems(items: ManagedServiceItem[]) {
   }));
 }
 
-function getStorageKey(sessionToken: string) {
-  return `ayosnow-managed-services:${sessionToken}`;
-}
-
 export function MyServicesManager({
   locale,
-  sessionToken,
   ownerName,
   initialItems,
 }: MyServicesManagerProps) {
   const text = getMyServicesText(locale);
   const normalizedInitialItems = normalizeInitialItems(initialItems);
 
-  const [items, setItems] = useState<ManagedServiceItem[]>(() => {
-    if (typeof window === "undefined") {
-      return normalizedInitialItems;
-    }
-
-    const storedValue = window.localStorage.getItem(getStorageKey(sessionToken));
-    if (!storedValue) {
-      return normalizedInitialItems;
-    }
-
-    try {
-      const parsed = JSON.parse(storedValue) as ManagedServiceItem[];
-      return normalizeInitialItems(parsed);
-    } catch {
-      return normalizedInitialItems;
-    }
-  });
+  const [items, setItems] = useState<ManagedServiceItem[]>(normalizedInitialItems);
   const [isFormOpen, setIsFormOpen] = useState(normalizedInitialItems.length === 0);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formState, setFormState] = useState<ServiceFormState>(emptyFormState);
   const [errors, setErrors] = useState<ServiceFormErrors>({});
   const [notice, setNotice] = useState("");
-
-  const persistItems = (nextItems: ManagedServiceItem[]) => {
-    setItems(nextItems);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(
-        getStorageKey(sessionToken),
-        JSON.stringify(nextItems),
-      );
-    }
-  };
+  const [isSaving, setIsSaving] = useState(false);
 
   const resetForm = () => {
     setFormState(emptyFormState);
@@ -303,7 +263,7 @@ export function MyServicesManager({
     return nextErrors;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors = validateForm(formState);
@@ -312,50 +272,104 @@ export function MyServicesManager({
       return;
     }
 
-    const nextItem: ManagedServiceItem = {
-      id: editingId ?? `svc-local-${crypto.randomUUID()}`,
-      slug: slugify(formState.title),
+    const payload = {
       title: formState.title.trim(),
       location: formState.location.trim(),
       priceLabel: formState.priceLabel.trim(),
       arrival: formState.arrival.trim(),
       tags: parseTags(formState.tagsText),
-      isActive:
-        editingId !== null
-          ? items.find((item) => item.id === editingId)?.isActive ?? true
-          : true,
     };
 
-    const nextItems =
-      editingId === null
-        ? [nextItem, ...items]
-        : items.map((item) => (item.id === editingId ? nextItem : item));
+    setIsSaving(true);
+    setNotice("");
 
-    persistItems(nextItems);
-    setNotice(editingId === null ? text.createdMessage : text.updatedMessage);
-    resetForm();
-    setIsFormOpen(false);
-  };
+    try {
+      const response = await fetch("/api/my-services", {
+        method: editingId === null ? "POST" : "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(
+          editingId === null
+            ? payload
+            : {
+                action: "update",
+                serviceId: editingId,
+                service: payload,
+              },
+        ),
+      });
+      const result = (await response.json().catch(() => null)) as
+        | { service?: ManagedServiceItem; error?: unknown }
+        | null;
 
-  const handleToggle = (targetId: string) => {
-    let nextNotice = text.disabledMessage;
-
-    const nextItems = items.map((item) => {
-      if (item.id !== targetId) {
-        return item;
+      if (!response.ok || !result?.service) {
+        throw new Error(
+          typeof result?.error === "string"
+            ? result.error
+            : "서비스를 저장하지 못했습니다.",
+        );
       }
 
-      const toggledItem = {
-        ...item,
-        isActive: !item.isActive,
-      };
+      setItems((current) =>
+        editingId === null
+          ? [result.service!, ...current]
+          : current.map((item) => (item.id === editingId ? result.service! : item)),
+      );
+      setNotice(editingId === null ? text.createdMessage : text.updatedMessage);
+      resetForm();
+      setIsFormOpen(false);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "서비스를 저장하지 못했습니다.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-      nextNotice = toggledItem.isActive ? text.enabledMessage : text.disabledMessage;
-      return toggledItem;
-    });
+  const handleToggle = async (targetId: string) => {
+    const target = items.find((item) => item.id === targetId);
+    if (!target) {
+      return;
+    }
 
-    persistItems(nextItems);
-    setNotice(nextNotice);
+    setIsSaving(true);
+    setNotice("");
+    let nextNotice = text.disabledMessage;
+
+    try {
+      const response = await fetch("/api/my-services", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "set-published",
+          serviceId: target.id,
+          isPublished: !target.isActive,
+        }),
+      });
+      const result = (await response.json().catch(() => null)) as
+        | { service?: ManagedServiceItem; error?: unknown }
+        | null;
+
+      if (!response.ok || !result?.service) {
+        throw new Error(
+          typeof result?.error === "string"
+            ? result.error
+            : "서비스 상태를 바꾸지 못했습니다.",
+        );
+      }
+
+      nextNotice = result.service.isActive ? text.enabledMessage : text.disabledMessage;
+      setItems((current) =>
+        current.map((item) => (item.id === targetId ? result.service! : item)),
+      );
+      setNotice(nextNotice);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "서비스 상태를 바꾸지 못했습니다.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const sortedItems = [...items].sort((left, right) => {
@@ -374,12 +388,13 @@ export function MyServicesManager({
             <p className="text-lg font-bold text-slate-950">{text.panelTitle}</p>
             <p className="text-sm text-slate-600">{text.panelDescription}</p>
             <p className="text-xs text-slate-500">
-              {ownerName} · {text.browserSaveNotice}
+              {ownerName} · {text.serverSaveNotice}
             </p>
           </div>
           <button
             type="button"
             onClick={openCreateForm}
+            disabled={isSaving}
             className="shrink-0 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white"
           >
             {text.addAction}
@@ -497,9 +512,16 @@ export function MyServicesManager({
           <div className="flex flex-wrap gap-3">
             <button
               type="submit"
+              disabled={isSaving}
               className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white"
             >
-              {editingId === null ? text.createAction : text.updateAction}
+              {isSaving
+                ? locale === "ko"
+                  ? "저장 중..."
+                  : "Saving..."
+                : editingId === null
+                  ? text.createAction
+                  : text.updateAction}
             </button>
             <button
               type="button"
@@ -558,8 +580,9 @@ export function MyServicesManager({
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleToggle(item.id)}
-                    className="rounded-full border border-teal-200 px-3 py-1.5 text-xs font-semibold text-teal-700"
+                      onClick={() => handleToggle(item.id)}
+                      disabled={isSaving}
+                      className="rounded-full border border-teal-200 px-3 py-1.5 text-xs font-semibold text-teal-700"
                   >
                     {item.isActive ? text.disableAction : text.enableAction}
                   </button>

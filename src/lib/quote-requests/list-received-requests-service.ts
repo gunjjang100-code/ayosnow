@@ -1,12 +1,11 @@
 import { NotificationRelatedType, UserRole } from "@prisma/client";
 
-import { getQuoteRequests } from "@/lib/constants/mock-data";
 import { prisma } from "@/lib/prisma";
 import type { Locale, QuoteRequestPreview } from "@/lib/types";
 
 export interface ReceivedQuoteRequestsResult {
   items: QuoteRequestPreview[];
-  source: "database" | "demo-fallback";
+  source: "database";
 }
 
 function formatBudgetLabel(min: string | null, max: string | null) {
@@ -134,11 +133,12 @@ export async function listReceivedQuoteRequestsForWorkspace(params: {
       }
     }
   } catch {
-    // DB가 잠깐 불안정할 때도 화면은 먼저 살려 두기 위해 조용히 fallback 한다.
+    // 운영형 화면에서는 예시 요청을 섞지 않는다.
+    // DB 오류가 나면 빈 목록을 반환하고, 실제 오류 감지는 서버 로그/모니터링에서 처리한다.
   }
 
   return {
-    source: "demo-fallback",
-    items: getQuoteRequests(params.locale),
+    source: "database",
+    items: [],
   };
 }

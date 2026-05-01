@@ -6,3 +6,10 @@ export const WALLET_TOPUP_PENDING_WINDOW_MINUTES = 10;
 export function isSupportedWalletTopupAmount(amount: number) {
   return WALLET_TOPUP_PACKAGES.includes(amount as (typeof WALLET_TOPUP_PACKAGES)[number]);
 }
+
+export function buildQuoteSubmissionFeeReferenceKey(params: {
+  userId: string;
+  quoteRequestId: string;
+}) {
+  return `quote-fee:${params.userId}:${params.quoteRequestId}`;
+}

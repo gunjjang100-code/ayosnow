@@ -4,10 +4,8 @@ import {
   Prisma,
 } from "@prisma/client";
 
-import { ensureDemoData } from "@/lib/demo/demo-data";
-import { getChatPreviews } from "@/lib/constants/mock-data";
 import { prisma } from "@/lib/prisma";
-import type { BookingStatus, Locale, UserRole } from "@/lib/types";
+import type { BookingStatus, Locale } from "@/lib/types";
 
 type ConversationRecord = Prisma.ConversationGetPayload<{
   include: {
@@ -131,147 +129,8 @@ export interface ConversationDetail {
   messages: ConversationMessageItem[];
 }
 
-export type ConversationListSource = "database" | "demo-fallback";
-
 function toIso(date: Date | null | undefined) {
   return date ? date.toISOString() : null;
-}
-
-function isDemoConversationId(conversationId: string) {
-  return conversationId.startsWith("demo-chat-");
-}
-
-function getDemoChatTimestamp(offsetMinutes: number) {
-  return new Date(Date.now() - offsetMinutes * 60 * 1000).toISOString();
-}
-
-function getDemoChatMeta(locale: Locale) {
-  if (locale === "ko") {
-    return {
-      systemCreated: "데모 작업 대화입니다.",
-      myReply: "확인했습니다. 화면 흐름만 먼저 점검하고 있습니다.",
-      readonlyError: "데모 대화에서는 메시지를 보낼 수 없습니다.",
-      readonlyHint: "데모 대화는 미리보기 전용이라 메시지 전송은 막혀 있습니다.",
-    };
-  }
-
-  if (locale === "fil") {
-    return {
-      systemCreated: "Ito ay demo work conversation.",
-      myReply: "Nakita ko na. Tinitingnan ko muna ang flow ng screen.",
-      readonlyError: "Hindi puwedeng magpadala ng mensahe sa demo conversation.",
-      readonlyHint: "Preview-only ang demo conversation kaya naka-block ang pagpapadala.",
-    };
-  }
-
-  return {
-    systemCreated: "This is a demo work conversation.",
-    myReply: "Confirmed. I am checking the screen flow first.",
-    readonlyError: "Messages cannot be sent in a demo conversation.",
-    readonlyHint: "The demo conversation is preview-only, so sending is disabled.",
-  };
-}
-
-function buildDemoConversationList(params: {
-  locale: Locale;
-  role: UserRole;
-}): ConversationListItem[] {
-  return getChatPreviews(params.locale).map((preview, index) => ({
-    id: `demo-${preview.id}`,
-    partnerName: preview.participantName,
-    partnerAvatarUrl: null,
-    partnerRole: params.role === "customer" ? "tradesman" : "customer",
-    jobTitle: preview.jobTitle,
-    scheduleLabel: getDemoChatTimestamp((index + 1) * 60),
-    unreadCount: preview.unreadCount,
-    lastMessagePreview: preview.lastMessage,
-    lastMessageType: "text",
-    lastMessageAt: getDemoChatTimestamp(index === 0 ? 2 : 12),
-    bookingId: index === 0 ? "bk-1" : "bk-2",
-    requestId: null,
-  }));
-}
-
-function buildDemoConversationDetail(params: {
-  conversationId: string;
-  currentUserId: string;
-  role: UserRole;
-  locale: Locale;
-}) {
-  const previewIndex = params.conversationId === "demo-chat-1" ? 0 : params.conversationId === "demo-chat-2" ? 1 : -1;
-  const preview = getChatPreviews(params.locale)[previewIndex];
-
-  if (!preview) {
-    return null;
-  }
-
-  const meta = getDemoChatMeta(params.locale);
-  const partnerRole = params.role === "customer" ? "tradesman" : "customer";
-  const myName =
-    params.role === "customer"
-      ? params.locale === "ko"
-        ? "고객"
-        : params.locale === "fil"
-          ? "Customer"
-          : "Customer"
-      : params.locale === "ko"
-        ? "전문가"
-        : params.locale === "fil"
-          ? "Tradesman"
-          : "Tradesman";
-
-  return {
-    id: params.conversationId,
-    partnerName: preview.participantName,
-    partnerAvatarUrl: null,
-    jobTitle: preview.jobTitle,
-    scheduleLabel: getDemoChatTimestamp((previewIndex + 1) * 60),
-    headerMeta: meta.readonlyHint,
-    bookingId: previewIndex === 0 ? "bk-1" : "bk-2",
-    bookingStatus: previewIndex === 0 ? "accepted" : "pending",
-    requestId: null,
-    messages: [
-      {
-        id: `${params.conversationId}-system`,
-        senderId: null,
-        senderName: "System",
-        senderAvatarUrl: null,
-        senderRole: "system",
-        messageType: "system",
-        content: meta.systemCreated,
-        imageUrl: null,
-        createdAt: getDemoChatTimestamp(previewIndex === 0 ? 16 : 22),
-        readAt: null,
-        isMine: false,
-      },
-      {
-        id: `${params.conversationId}-partner`,
-        senderId: `demo-partner-${previewIndex + 1}`,
-        senderName: preview.participantName,
-        senderAvatarUrl: null,
-        senderRole: partnerRole,
-        messageType: "text",
-        content: preview.lastMessage,
-        imageUrl: null,
-        createdAt: getDemoChatTimestamp(previewIndex === 0 ? 2 : 12),
-        readAt: null,
-        isMine: false,
-      },
-      {
-        id: `${params.conversationId}-mine`,
-        senderId: params.currentUserId,
-        senderName: myName,
-        senderAvatarUrl: null,
-        senderRole: params.role === "customer" ? "customer" : "tradesman",
-        messageType: "text",
-        content: meta.myReply,
-        imageUrl: null,
-        createdAt: getDemoChatTimestamp(previewIndex === 0 ? 1 : 8),
-        readAt: getDemoChatTimestamp(previewIndex === 0 ? 1 : 8),
-        isMine: true,
-      },
-    ],
-  } satisfies ConversationDetail;
 }
 
 function getConversationJobTitle(conversation: ConversationRecord) {
@@ -419,8 +278,6 @@ export async function getOrCreateConversationForBooking(params: {
   bookingId: string;
   actorUserId: string;
 }) {
-  await ensureDemoData();
-
   const booking = await prisma.booking.findUnique({
     where: { id: params.bookingId },
   });
@@ -581,8 +438,6 @@ export async function addBookingCompletedSystemMessage(params: {
 
 export async function listConversationsForUser(userId: string) {
   try {
-    await ensureDemoData();
-
     const conversations = await prisma.conversation.findMany({
       where: {
         OR: [{ customerId: userId }, { tradesmanId: userId }],
@@ -679,7 +534,6 @@ export async function listConversationsForUser(userId: string) {
 
 export async function listConversationFeedForUser(params: {
   userId: string;
-  role: UserRole;
   locale: Locale;
 }) {
   const conversations = await listConversationsForUser(params.userId);
@@ -688,16 +542,6 @@ export async function listConversationFeedForUser(params: {
     return {
       source: "database" as const,
       conversations,
-    };
-  }
-
-  if (String(params.userId).startsWith("demo-")) {
-    return {
-      source: "demo-fallback" as const,
-      conversations: buildDemoConversationList({
-        locale: params.locale,
-        role: params.role,
-      }),
     };
   }
 
@@ -710,23 +554,8 @@ export async function listConversationFeedForUser(params: {
 export async function getConversationDetailForUser(
   conversationId: string,
   userId: string,
-  options?: {
-    locale?: Locale;
-    role?: UserRole;
-  },
 ) {
-  if (isDemoConversationId(conversationId) && options?.locale && options.role) {
-    return buildDemoConversationDetail({
-      conversationId,
-      currentUserId: userId,
-      locale: options.locale,
-      role: options.role,
-    });
-  }
-
   try {
-    await ensureDemoData();
-
     const conversation = (await prisma.conversation.findUnique({
       where: { id: conversationId },
       include: conversationInclude,
@@ -767,12 +596,6 @@ export async function markConversationAsReadForUser(
   conversationId: string,
   userId: string,
 ) {
-  if (isDemoConversationId(conversationId)) {
-    return 0;
-  }
-
-  await ensureDemoData();
-
   const conversation = await prisma.conversation.findUnique({
     where: { id: conversationId },
   });
@@ -807,12 +630,6 @@ export async function sendMessageToConversation(params: {
   content: string;
   imageDataUrl?: string;
 }) {
-  if (isDemoConversationId(params.conversationId)) {
-    return "demo-readonly" as const;
-  }
-
-  await ensureDemoData();
-
   const conversation = await prisma.conversation.findUnique({
     where: { id: params.conversationId },
   });

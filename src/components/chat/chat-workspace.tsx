@@ -77,16 +77,12 @@ interface ChatWorkspaceText {
   chatOpenBookingDetail: string;
   chatSourceLiveTitle: string;
   chatSourceLiveDescription: string;
-  chatSourceDemoTitle: string;
-  chatSourceDemoDescription: string;
-  chatDemoReadonlyHint: string;
 }
 
 interface ChatWorkspaceProps {
   locale: Locale;
   text: ChatWorkspaceText;
   initialConversationId?: string;
-  initialConversationSource?: "database" | "demo-fallback";
 }
 
 function formatDateTime(value: string, locale: Locale, options?: Intl.DateTimeFormatOptions) {
@@ -147,16 +143,12 @@ export function ChatWorkspace({
   locale,
   text,
   initialConversationId,
-  initialConversationSource = "database",
 }: ChatWorkspaceProps) {
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(
     initialConversationId ?? null,
   );
   const [activeConversation, setActiveConversation] = useState<ConversationDetail | null>(null);
-  const [conversationSource, setConversationSource] = useState<"database" | "demo-fallback">(
-    initialConversationSource,
-  );
   const [isLoadingList, setIsLoadingList] = useState(true);
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -176,7 +168,7 @@ export function ChatWorkspace({
     const result = (await response.json().catch(() => null)) as
       | {
           conversations?: ConversationListItem[];
-          source?: "database" | "demo-fallback";
+          source?: "database";
           error?: string;
         }
       | null;
@@ -188,7 +180,6 @@ export function ChatWorkspace({
     }
 
     setConversations(result.conversations);
-    setConversationSource(result.source ?? "database");
     setErrorMessage(null);
     setIsLoadingList(false);
 
@@ -325,34 +316,10 @@ export function ChatWorkspace({
           <h2 className="text-lg font-bold text-slate-950">{text.chatListTitle}</h2>
         </div>
 
-        <div
-          className={
-            conversationSource === "database"
-              ? "border-b border-teal-100 bg-teal-50 px-5 py-4 text-slate-800"
-              : "border-b border-amber-200 bg-amber-50 px-5 py-4 text-amber-950"
-          }
-        >
-          <p
-            className={
-              conversationSource === "database"
-                ? "text-sm font-bold text-teal-800"
-                : "text-sm font-bold text-amber-900"
-            }
-          >
-            {conversationSource === "database"
-              ? text.chatSourceLiveTitle
-              : text.chatSourceDemoTitle}
-          </p>
-          <p
-            className={
-              conversationSource === "database"
-                ? "mt-2 text-sm leading-6 text-slate-700"
-                : "mt-2 text-sm leading-6 text-amber-800"
-            }
-          >
-            {conversationSource === "database"
-              ? text.chatSourceLiveDescription
-              : text.chatSourceDemoDescription}
+        <div className="border-b border-teal-100 bg-teal-50 px-5 py-4 text-slate-800">
+          <p className="text-sm font-bold text-teal-800">{text.chatSourceLiveTitle}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-700">
+            {text.chatSourceLiveDescription}
           </p>
         </div>
 
@@ -535,11 +502,6 @@ export function ChatWorkspace({
             </div>
 
             <div className="border-t border-slate-200 px-5 py-4">
-              {activeConversation.id.startsWith("demo-chat-") ? (
-                <div className="mb-3 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
-                  {text.chatDemoReadonlyHint}
-                </div>
-              ) : null}
               {imagePreview ? (
                 <div className="mb-3 rounded-3xl border border-slate-200 bg-slate-50 p-3">
                   <p className="text-xs font-semibold text-slate-500">{text.chatImagePreview}</p>
@@ -584,11 +546,7 @@ export function ChatWorkspace({
                   <button
                     type="button"
                     onClick={handleSend}
-                    disabled={
-                      activeConversation.id.startsWith("demo-chat-") ||
-                      isSending ||
-                      (!draft.trim() && !imagePreview)
-                    }
+                    disabled={isSending || (!draft.trim() && !imagePreview)}
                     className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-400"
                   >
                     {isSending ? text.chatSending : text.chatSendButton}

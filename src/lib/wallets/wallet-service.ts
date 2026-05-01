@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { AppError } from "@/lib/errors/app-error";
 import { prisma } from "@/lib/prisma";
 import {
+  buildQuoteSubmissionFeeReferenceKey,
   DEMO_TRADESMAN_INITIAL_CREDIT,
   QUOTE_SUBMISSION_CREDIT_COST,
 } from "@/lib/wallets/wallet-topup-config";
@@ -153,7 +154,10 @@ export async function chargeCreditsForQuoteSubmission(params: {
   // 중복 차감 방지 핵심:
   // quoteId가 아니라 "전문가 + 견적요청" 기준으로 고정 키를 만든다.
   // 같은 전문가가 같은 요청에 견적을 수정해도 이 키가 이미 있으면 추가 차감하지 않는다.
-  const referenceKey = `quote-fee:${params.userId}:${params.quoteRequestId}`;
+  const referenceKey = buildQuoteSubmissionFeeReferenceKey({
+    userId: params.userId,
+    quoteRequestId: params.quoteRequestId,
+  });
 
   await acquireTransactionLock({
     tx: params.tx,

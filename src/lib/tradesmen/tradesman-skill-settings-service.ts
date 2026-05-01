@@ -1,6 +1,5 @@
 import { UserRole } from "@prisma/client";
 
-import { ensureDemoData } from "@/lib/demo/demo-data";
 import { AppError } from "@/lib/errors/app-error";
 import { prisma } from "@/lib/prisma";
 
@@ -11,8 +10,6 @@ export interface TradesmanSkillCategoryOption {
 }
 
 export async function listTradesmanSkillSettings(userId: string) {
-  await ensureDemoData();
-
   const [categories, profile] = await Promise.all([
     prisma.serviceCategory.findMany({
       where: { isActive: true },
@@ -45,8 +42,6 @@ export async function updateTradesmanSkillSettings(params: {
   userId: string;
   categorySlugs: string[];
 }) {
-  await ensureDemoData();
-
   const user = await prisma.user.findUnique({
     where: { id: params.userId },
     select: {

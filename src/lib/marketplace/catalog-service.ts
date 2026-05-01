@@ -36,6 +36,14 @@ function serviceTags(durationMinutes: number, categoryName: string) {
   return [categoryName, durationLabel, "검증된 전문가"];
 }
 
+function getServiceTags(service: { tags: string[]; durationMinutes: number; category: { name: string } }) {
+  if (service.tags.length > 0) {
+    return service.tags;
+  }
+
+  return serviceTags(service.durationMinutes, service.category.name);
+}
+
 export async function listMarketplaceCategories(locale: Locale): Promise<Category[]> {
   const categories = await prisma.serviceCategory.findMany({
     where: { isActive: true },
@@ -108,12 +116,12 @@ export async function listMarketplaceServices(params?: {
     categorySlug: service.category.slug,
     providerName: service.owner.fullName,
     providerSlug: service.owner.id,
-    location: service.owner.city ?? service.category.name,
+    location: service.serviceArea ?? service.owner.city ?? service.category.name,
     priceLabel: formatPhpRange(service.basePriceMin, service.basePriceMax),
     rating: service.owner.tradesmanProfile?.averageRating ?? 0,
     reviewCount: service.owner.tradesmanProfile?.completedJobs ?? 0,
     arrival: service.shortDescription,
-    tags: serviceTags(service.durationMinutes, service.category.name),
+    tags: getServiceTags(service),
   }));
 }
 

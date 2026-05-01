@@ -1,34 +1,23 @@
 import { MyServicesManager } from "@/components/services/my-services-manager";
 import { PageShell } from "@/components/shared/page-shell";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
-import { getDemoSessionUser } from "@/lib/auth/session";
-import { getFeaturedServices } from "@/lib/constants/mock-data";
+import { getSessionUser } from "@/lib/auth/session";
 import { getCurrentLocale } from "@/lib/i18n-server";
-import {
-  canAccessTradesmanWorkspace,
-  getRoleAccessNoticeCopy,
-} from "@/lib/role-ui";
-import type { ManagedServiceItem } from "@/lib/types";
+import { getRoleAccessNoticeCopy } from "@/lib/role-ui";
+import { listManagedServicesForUser } from "@/lib/services/my-services-service";
+import type { UserRole } from "@/lib/types";
 
 export default async function MyServicesPage() {
   const locale = await getCurrentLocale();
-  const sessionUser = await getDemoSessionUser();
-  const canUsePage = canAccessTradesmanWorkspace(sessionUser.role);
-  const services = getFeaturedServices(locale);
-  const filteredServices =
-    sessionUser.role === "admin"
-      ? services
-      : services.filter((service) => service.providerName === sessionUser.name);
-  const initialItems: ManagedServiceItem[] = filteredServices.map((service) => ({
-    id: service.id,
-    slug: service.slug,
-    title: service.title,
-    location: service.location,
-    priceLabel: service.priceLabel,
-    arrival: service.arrival,
-    tags: service.tags,
-    isActive: true,
-  }));
+  const sessionUser = await getSessionUser();
+  const currentRole: UserRole = sessionUser?.role ?? "customer";
+  const canUsePage = sessionUser?.role === "tradesman";
+  const initialItems = sessionUser
+    ? await listManagedServicesForUser({
+        userId: sessionUser.id,
+        role: currentRole,
+      })
+    : [];
 
   return (
     <PageShell
@@ -52,17 +41,16 @@ export default async function MyServicesPage() {
         <RoleAccessNotice
           {...getRoleAccessNoticeCopy({
             locale,
-            currentRole: sessionUser.role,
+            currentRole,
             targetWorkspace: "tradesman-workspace",
           })}
         />
       ) : null}
 
-      {canUsePage ? (
+      {canUsePage && sessionUser ? (
         <MyServicesManager
-          key={sessionUser.token}
+          key={sessionUser.id}
           locale={locale}
-          sessionToken={sessionUser.token}
           ownerName={sessionUser.name}
           initialItems={initialItems}
         />

@@ -21,7 +21,6 @@ export async function GET(request: NextRequest) {
   const locale = toLocale(request.nextUrl.searchParams.get("locale"));
   const result = await listConversationFeedForUser({
     userId: sessionUser.id,
-    role: sessionUser.role,
     locale,
   });
 

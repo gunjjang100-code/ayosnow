@@ -8,7 +8,6 @@ import {
 
 import type { QuoteRequestInput } from "@/lib/validations/quote-request";
 import { AppError } from "@/lib/errors/app-error";
-import { ensureDemoData } from "@/lib/demo/demo-data";
 import { createNotifications, toMoneyDecimal } from "@/lib/notifications/service";
 import { prisma } from "@/lib/prisma";
 
@@ -55,8 +54,6 @@ export async function createQuoteRequest(params: {
   customerId: string;
   input: QuoteRequestInput;
 }) {
-  await ensureDemoData();
-
   const category = await ensureQuoteRequestCategory(params.input);
 
   if (!category) {

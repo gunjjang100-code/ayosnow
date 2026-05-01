@@ -104,8 +104,12 @@ const demoCategories = [
 
 let demoDataReady = false;
 
+export function isDemoDataEnabled() {
+  return process.env.ENABLE_DEMO_DATA === "true";
+}
+
 export async function ensureDemoData() {
-  if (process.env.NODE_ENV === "production" && process.env.ENABLE_DEMO_DATA !== "true") {
+  if (!isDemoDataEnabled()) {
     return;
   }
 

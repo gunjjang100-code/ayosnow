@@ -6,7 +6,7 @@ import type { Locale } from "@/lib/types";
 
 interface PushNotificationSettingsProps {
   locale: Locale;
-  vapidPublicKey: string;
+  vapidPublicKey: string | null;
 }
 
 function toUint8Array(base64String: string) {
@@ -52,6 +52,7 @@ export function PushNotificationSettings({
         successOn: "Push alerts were enabled on this device.",
         successOff: "Push alerts were turned off on this device.",
         error: "Push setup failed. Please try again.",
+        missingKey: "Push is not configured on the server yet.",
       };
     }
 
@@ -76,6 +77,7 @@ export function PushNotificationSettings({
         successOn: "Na-enable ang push alerts sa device na ito.",
         successOff: "Na-off ang push alerts sa device na ito.",
         error: "Hindi naihanda ang push alerts. Pakisubukang muli.",
+        missingKey: "Hindi pa naka-configure ang push sa server.",
       };
     }
 
@@ -98,6 +100,7 @@ export function PushNotificationSettings({
       successOn: "이 기기에서 푸시 알림이 켜졌습니다.",
       successOff: "이 기기에서 푸시 알림을 껐습니다.",
       error: "푸시 알림 설정에 실패했습니다. 다시 시도해 주세요.",
+      missingKey: "서버에 푸시 키가 아직 설정되지 않았습니다.",
     };
   }, [locale]);
 
@@ -134,6 +137,11 @@ export function PushNotificationSettings({
   }, [permission]);
 
   async function enablePush() {
+    if (!vapidPublicKey) {
+      setFeedback(text.missingKey);
+      return;
+    }
+
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       setPermission("unsupported");
       return;
@@ -247,7 +255,7 @@ export function PushNotificationSettings({
         <button
           type="button"
           onClick={() => void enablePush()}
-          disabled={loading || permission === "unsupported" || subscribed}
+          disabled={loading || !vapidPublicKey || permission === "unsupported" || subscribed}
           className="rounded-full border border-teal-300 px-4 py-2 text-sm font-semibold text-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {text.enable}

@@ -2,15 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getRequestSessionUser } from "@/lib/auth/session";
 import { getConversationDetailForUser } from "@/lib/chat/service";
-import type { Locale } from "@/lib/types";
-
-function toLocale(value: string | null): Locale {
-  if (value === "fil" || value === "en") {
-    return value;
-  }
-
-  return "ko";
-}
 
 export async function GET(
   request: NextRequest,
@@ -22,11 +13,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const locale = toLocale(request.nextUrl.searchParams.get("locale"));
-  const conversation = await getConversationDetailForUser(id, sessionUser.id, {
-    locale,
-    role: sessionUser.role,
-  });
+  const conversation = await getConversationDetailForUser(id, sessionUser.id);
 
   if (conversation === "forbidden") {
     return NextResponse.json(

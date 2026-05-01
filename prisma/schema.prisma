@@ -70,14 +70,6 @@ enum MessageType {
   SYSTEM
 }
 
-enum PaymentStatus {
-  PENDING
-  HELD_IN_ESCROW
-  RELEASED
-  REFUNDED
-  FAILED
-}
-
 enum CreditTransactionType {
   CHARGE
   REFUND
@@ -95,18 +87,6 @@ enum WalletTopupStatus {
   FAILED
   EXPIRED
   REFUNDED
-}
-
-enum WithdrawalRequestStatus {
-  PENDING
-  APPROVED
-  PAID
-  REJECTED
-}
-
-enum WithdrawalMethod {
-  GCASH
-  BANK_TRANSFER
 }
 
 enum DisputeStatus {
@@ -174,8 +154,6 @@ model User {
   sentMessages           Message[]                  @relation("ConversationSender")
   writtenReviews         Review[]                   @relation("ReviewAuthor")
   receivedReviews        Review[]                   @relation("ReviewTarget")
-  customerPayments       Payment[]                  @relation("CustomerPayments")
-  tradesmanPayments      Payment[]                  @relation("TradesmanPayments")
   raisedDisputes         Dispute[]                  @relation("RaisedDisputes")
   handledDisputes        Dispute[]                  @relation("HandledDisputes")
   commissionRulesCreated PlatformCommissionRule[]   @relation("CommissionCreatedBy")
@@ -191,8 +169,6 @@ model User {
   wallet                 Wallet?
   creditTransactions     CreditTransaction[]
   walletTopupPayments    WalletTopupPayment[]
-  withdrawalRequests     WithdrawalRequest[]        @relation("TradesmanWithdrawalRequests")
-  reviewedWithdrawals    WithdrawalRequest[]        @relation("WithdrawalReviewedBy")
 
   @@index([role, status])
 }
@@ -283,6 +259,8 @@ model Service {
   shortDescription        String
   basePriceMin            Decimal                  @db.Decimal(10, 2)
   basePriceMax            Decimal                  @db.Decimal(10, 2)
+  serviceArea             String?
+  tags                    String[]                 @default([])
   durationMinutes         Int
   isPublished             Boolean                  @default(false)
   createdAt               DateTime                 @default(now())
@@ -363,7 +341,6 @@ model Booking {
   quote          Quote?        @relation(fields: [quoteId], references: [id], onDelete: SetNull)
   conversation   Conversation?
   reviews        Review[]
-  payments       Payment[]
   disputes       Dispute[]
   oneOutCases    OneOutCase[]
 
@@ -458,28 +435,6 @@ model WalletTopupPayment {
   @@index([status, createdAt(sort: Desc)])
 }
 
-model WithdrawalRequest {
-  id            String                  @id @default(cuid())
-  requestCode   String                  @unique
-  tradesmanId   String
-  amount        Int
-  method        WithdrawalMethod
-  accountName   String
-  accountNumber String
-  status        WithdrawalRequestStatus @default(PENDING)
-  reviewedById  String?
-  reviewedAt    DateTime?
-  paidAt        DateTime?
-  rejectedAt    DateTime?
-  createdAt     DateTime                @default(now())
-  updatedAt     DateTime                @updatedAt
-  tradesman     User                    @relation("TradesmanWithdrawalRequests", fields: [tradesmanId], references: [id], onDelete: Cascade)
-  reviewedBy    User?                   @relation("WithdrawalReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
-
-  @@index([tradesmanId, status, createdAt(sort: Desc)])
-  @@index([status, createdAt(sort: Desc)])
-}
-
 model Conversation {
   id          String        @id @default(cuid())
   customerId  String
@@ -533,26 +488,6 @@ model Review {
   targetUser   User     @relation("ReviewTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
 
   @@index([targetUserId, rating])
-}
-
-model Payment {
-  id                String        @id @default(cuid())
-  bookingId         String
-  customerId        String
-  tradesmanId       String
-  provider          String
-  providerReference String        @unique
-  amount            Decimal       @db.Decimal(10, 2)
-  status            PaymentStatus @default(PENDING)
-  paidAt            DateTime?
-  releasedAt        DateTime?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  customer          User          @relation("CustomerPayments", fields: [customerId], references: [id], onDelete: Cascade)
-  tradesman         User          @relation("TradesmanPayments", fields: [tradesmanId], references: [id], onDelete: Cascade)
-
-  @@index([bookingId, status])
 }
 
 model Dispute {

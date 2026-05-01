@@ -29,13 +29,6 @@ export async function POST(
       imageDataUrl: parsed.data.imageDataUrl,
     });
 
-    if (message === "demo-readonly") {
-      return NextResponse.json(
-        { error: "데모 대화에서는 메시지를 보낼 수 없습니다." },
-        { status: 400 },
-      );
-    }
-
     if (message === "forbidden") {
       return NextResponse.json(
         { error: "이 대화에 메시지를 보낼 권한이 없습니다." },
