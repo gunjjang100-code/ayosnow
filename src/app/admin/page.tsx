@@ -5,16 +5,9 @@ import { AdminManualCreditPanel } from "@/components/admin/admin-manual-credit-p
 import { StatCards, type AdminStatCard } from "@/components/admin/StatCards";
 import { PageShell } from "@/components/shared/page-shell";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
-import {
-  getAdminAlerts,
-  getAdminCategories,
-  getApprovalQueue,
-  getBannerItems,
-  getNoticeItems,
-  getOneOutCases,
-} from "@/lib/constants/mock-data";
+import { listAdminCategoryItems } from "@/lib/admin/admin-category-service";
 import { getAdminQuoteFeeRevenueStats } from "@/lib/admin/wallet-admin-service";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { copy } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import { canAccessAdminWorkspace, getRoleAccessNoticeCopy } from "@/lib/role-ui";
@@ -27,14 +20,11 @@ import { formatAdminDate } from "@/lib/utils";
 export default async function AdminPage() {
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const canUseAdminWorkspace = canAccessAdminWorkspace(sessionUser.role);
-  const adminAlerts = getAdminAlerts(locale);
-  const adminCategories = getAdminCategories(locale);
-  const bannerItems = getBannerItems(locale);
-  const noticeItems = getNoticeItems(locale);
-  const approvalQueue = getApprovalQueue(locale);
-  const oneOutCases = getOneOutCases(locale);
+  const adminCategories = canUseAdminWorkspace
+    ? await listAdminCategoryItems(locale)
+    : [];
   const revenueStats = canUseAdminWorkspace
     ? await getAdminQuoteFeeRevenueStats()
     : { totalRevenue: 0, feeCount: 0, recentRows: [], walletCount: 0 };
@@ -42,7 +32,7 @@ export default async function AdminPage() {
     {
       label: "Quote Fees",
       value: revenueStats.feeCount,
-      helper: "전문가가 최초 견적 제출 시 차감된 40 PHP 기록 수입니다.",
+      helper: "전문가 견적 제출로 발생한 수익 건수입니다.",
       tone: "orange",
     },
     {
@@ -55,7 +45,7 @@ export default async function AdminPage() {
     {
       label: "Expert Wallets",
       value: revenueStats.walletCount,
-      helper: "크레딧 잔액을 관리 중인 전문가 지갑 수입니다.",
+      helper: "크레딧을 보유한 전문가 계정 수입니다.",
       tone: "green",
     },
     {
@@ -168,19 +158,6 @@ export default async function AdminPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        {adminAlerts.map((alert) => (
-          <article key={alert.id} className="panel-shell p-5">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-teal-700">{alert.type}</p>
-            <h2 className="mt-2 text-xl font-bold text-slate-950">{alert.title}</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">{alert.description}</p>
-            <button className="mt-5 rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white">
-              {alert.actionLabel}
-            </button>
-          </article>
-        ))}
-      </section>
-
       <section className="grid gap-4 xl:grid-cols-2">
         <AdminCategoryManager
           key={locale}
@@ -192,136 +169,27 @@ export default async function AdminPage() {
         <article className="panel-shell p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-slate-950">견적료 정책</h2>
+              <h2 className="text-xl font-bold text-slate-950">견적료 수익</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                AyosNow MVP의 수익은 전문가가 요청서에 처음 견적을 보낼 때 차감되는 40 PHP입니다.
-                같은 요청서에 견적을 수정해도 다시 차감하지 않습니다.
+                전문가가 고객 요청에 처음 견적을 제출하면 40 PHP가 차감되고 관리자 수익으로 기록됩니다.
+                견적 수정에는 추가 비용이 붙지 않습니다.
               </p>
             </div>
             <span className="chip">40 PHP</span>
           </div>
           <div className="mt-5 grid gap-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-              <p className="font-bold text-slate-950">중복 차감 방지</p>
+              <p className="font-bold text-slate-950">중복 청구 방지</p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
-                서버가 전문가 ID와 요청서 ID를 기준으로 이미 견적료가 차감됐는지 확인합니다.
+                같은 요청에 같은 전문가가 다시 견적을 수정해도 추가 차감되지 않습니다.
               </p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-              <p className="font-bold text-slate-950">관리자 수익 기록</p>
+              <p className="font-bold text-slate-950">수익 내역</p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
-                차감 성공 시 크레딧 거래 내역에 관리자 수익으로 남겨 추적할 수 있습니다.
+                발생한 견적료는 전문가, 요청서, 금액, 시간을 함께 확인할 수 있습니다.
               </p>
             </div>
-          </div>
-        </article>
-        <article className="panel-shell p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-slate-950">{text.adminBannersPanel}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{text.adminBannersDescription}</p>
-            </div>
-            <div className="flex gap-2">
-              <button className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700">
-                {text.adminSecondaryAction}
-              </button>
-              <button className="rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white">
-                {text.adminPrimaryAction}
-              </button>
-            </div>
-          </div>
-          <div className="mt-5 grid gap-3">
-            {bannerItems.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <p className="font-bold text-slate-950">{item.title}</p>
-                  <span className="chip">{item.statusLabel}</span>
-                </div>
-                <div className="mt-3 grid gap-2 text-sm text-slate-700">
-                  <p>{text.adminColumnPlacement}: {item.placement}</p>
-                  <p>{text.adminColumnPeriod}: {item.activePeriod}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="panel-shell p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-slate-950">{text.adminNoticesPanel}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{text.adminNoticesDescription}</p>
-            </div>
-            <div className="flex gap-2">
-              <button className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700">
-                {text.adminSecondaryAction}
-              </button>
-              <button className="rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white">
-                {text.adminPrimaryAction}
-              </button>
-            </div>
-          </div>
-          <div className="mt-5 grid gap-3">
-            {noticeItems.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <p className="font-bold text-slate-950">{item.title}</p>
-                  <span className="chip">{item.statusLabel}</span>
-                </div>
-                <div className="mt-3 grid gap-2 text-sm text-slate-700">
-                  <p>{text.adminColumnAudience}: {item.audienceLabel}</p>
-                  <p>{text.adminColumnPublishedAt}: {item.publishedAt}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="panel-shell p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-slate-950">{text.adminApprovalsPanel}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{text.adminApprovalsDescription}</p>
-            </div>
-            <button className="rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white">
-              {text.adminApproveAction}
-            </button>
-          </div>
-          <div className="mt-5 grid gap-3">
-            {approvalQueue.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                <p className="font-bold text-slate-950">{item.tradesmanName}</p>
-                <div className="mt-3 grid gap-2 text-sm text-slate-700">
-                  <p>{text.adminColumnCategory}: {item.categoryLabel}</p>
-                  <p>{text.adminColumnSubmittedAt}: {item.submittedAt}</p>
-                  <p>{text.adminColumnVerification}: {item.verificationLabel}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="panel-shell p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-slate-950">{text.adminOneOutPanel}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{text.adminOneOutDescription}</p>
-            </div>
-            <button className="rounded-full bg-rose-600 px-4 py-2 text-sm font-bold text-white">
-              {text.adminSuspendAction}
-            </button>
-          </div>
-          <div className="mt-5 grid gap-3">
-            {oneOutCases.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-rose-200 bg-rose-50/60 p-4">
-                <p className="font-bold text-slate-950">{item.tradesmanName}</p>
-                <div className="mt-3 grid gap-2 text-sm text-slate-700">
-                  <p>{text.adminColumnIssue}: {item.issueSummary}</p>
-                  <p>{text.adminColumnRisk}: {item.riskLevel}</p>
-                  <p>{text.adminColumnLastAction}: {item.lastActionAt}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </article>
           </section>

@@ -31,9 +31,11 @@ export async function POST(request: NextRequest) {
     const createdUser = await tx.user.create({
       data: {
         email: parsed.data.email,
+        phoneNumber: parsed.data.phoneNumber,
         fullName: parsed.data.fullName,
         passwordHash: hashPassword(parsed.data.password),
         role: toDbRole(parsed.data.role),
+        roleSelectedAt: new Date(),
         status: AccountStatus.ACTIVE,
       },
       select: {

@@ -8,7 +8,6 @@ export default function LoginPage() {
     <AuthForm
       mode="login"
       googleEnabled={providers.google}
-      facebookEnabled={providers.facebook}
     />
   );
 }

@@ -149,9 +149,9 @@ function getMyServicesText(locale: Locale): MyServicesText {
   return {
     panelTitle: "고객에게 보여 줄 서비스를 여기서 직접 관리합니다",
     panelDescription:
-      "전문가가 이 화면에서 서비스 등록, 수정, 숨김 전환까지 바로 할 수 있는 구조입니다.",
+      "전문가는 이 화면에서 서비스 등록, 수정, 숨김 전환을 바로 관리할 수 있습니다.",
     serverSaveNotice:
-      "이제 서버 DB에 저장됩니다. 새로고침해도 서비스 목록이 유지됩니다.",
+      "저장한 서비스는 새로고침 후에도 그대로 유지됩니다.",
     addAction: "새 서비스 등록",
     editAction: "수정",
     disableAction: "끄기",

@@ -83,6 +83,7 @@ interface ChatWorkspaceProps {
   locale: Locale;
   text: ChatWorkspaceText;
   initialConversationId?: string;
+  enabled: boolean;
 }
 
 function formatDateTime(value: string, locale: Locale, options?: Intl.DateTimeFormatOptions) {
@@ -143,13 +144,14 @@ export function ChatWorkspace({
   locale,
   text,
   initialConversationId,
+  enabled,
 }: ChatWorkspaceProps) {
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(
     initialConversationId ?? null,
   );
   const [activeConversation, setActiveConversation] = useState<ConversationDetail | null>(null);
-  const [isLoadingList, setIsLoadingList] = useState(true);
+  const [isLoadingList, setIsLoadingList] = useState(enabled);
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -163,32 +165,46 @@ export function ChatWorkspace({
   );
 
   async function refreshConversations() {
-    setIsLoadingList(true);
-    const response = await fetch(`/api/conversations?locale=${locale}`, { cache: "no-store" });
-    const result = (await response.json().catch(() => null)) as
-      | {
-          conversations?: ConversationListItem[];
-          source?: "database";
-          error?: string;
-        }
-      | null;
-
-    if (!response.ok || !result?.conversations) {
-      setErrorMessage(result?.error ?? text.chatLoadError);
+    if (!enabled) {
       setIsLoadingList(false);
       return;
     }
 
-    setConversations(result.conversations);
-    setErrorMessage(null);
-    setIsLoadingList(false);
+    setIsLoadingList(true);
+    try {
+      const response = await fetch(`/api/conversations?locale=${locale}`, { cache: "no-store" });
+      const result = (await response.json().catch(() => null)) as
+        | {
+            conversations?: ConversationListItem[];
+            source?: "database";
+            error?: string;
+          }
+        | null;
 
-    if (!activeConversationId && result.conversations[0]) {
-      setActiveConversationId(result.conversations[0].id);
+      if (!response.ok || !result?.conversations) {
+        setErrorMessage(result?.error ?? text.chatLoadError);
+        setIsLoadingList(false);
+        return;
+      }
+
+      setConversations(result.conversations);
+      setErrorMessage(null);
+      setIsLoadingList(false);
+
+      if (!activeConversationId && result.conversations[0]) {
+        setActiveConversationId(result.conversations[0].id);
+      }
+    } catch {
+      setErrorMessage(text.chatLoadError);
+      setIsLoadingList(false);
     }
   }
 
   async function refreshConversation(conversationId: string) {
+    if (!enabled) {
+      return;
+    }
+
     setIsLoadingConversation(true);
 
     const response = await fetch(`/api/conversations/${conversationId}?locale=${locale}`, {
@@ -214,26 +230,42 @@ export function ChatWorkspace({
   }
 
   const loadConversationsInEffect = useEffectEvent(() => {
+    if (!enabled) {
+      return;
+    }
+
     void refreshConversations();
   });
 
   const loadConversationInEffect = useEffectEvent((conversationId: string) => {
+    if (!enabled) {
+      return;
+    }
+
     void refreshConversation(conversationId);
   });
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     loadConversationsInEffect();
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
-    if (!activeConversationId) {
+    if (!enabled || !activeConversationId) {
       return;
     }
 
     loadConversationInEffect(activeConversationId);
-  }, [activeConversationId]);
+  }, [activeConversationId, enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const interval = window.setInterval(() => {
       loadConversationsInEffect();
 
@@ -243,7 +275,7 @@ export function ChatWorkspace({
     }, 5000);
 
     return () => window.clearInterval(interval);
-  }, [activeConversationId]);
+  }, [activeConversationId, enabled]);
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -257,8 +289,8 @@ export function ChatWorkspace({
 
     const reader = new FileReader();
 
-    // 외부 저장소가 아직 없기 때문에, MVP에서는 이미지를 data URL로 잠깐 들고 간다.
-    // 나중에 S3 같은 저장소를 붙이면 이 부분만 업로드 URL 방식으로 바꾸면 된다.
+    // 전송 전 화면 확인용으로만 임시 이미지 주소를 만든다.
+    // 실제 저장은 메시지를 보낼 때 서버 API가 검증해서 처리한다.
     reader.onload = () => {
       const result = typeof reader.result === "string" ? reader.result : null;
       setImagePreview(result);
@@ -269,7 +301,7 @@ export function ChatWorkspace({
   }
 
   function handleSend() {
-    if (!activeConversationId) {
+    if (!enabled || !activeConversationId) {
       return;
     }
 

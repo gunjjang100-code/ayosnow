@@ -78,9 +78,24 @@ async function notifyBookingUpdate(params: {
 export async function rescheduleBooking(params: {
   bookingId: string;
   actorUserId: string;
+  actorRole: UserRole;
   scheduledAt: Date;
 }) {
-  const booking = await getAccessibleBooking(params.bookingId, params.actorUserId);
+  const booking = await getAccessibleBooking(
+    params.bookingId,
+    params.actorUserId,
+    params.actorRole,
+  );
+
+  if (
+    !canManageBookingProgress({
+      actorUserId: params.actorUserId,
+      actorRole: params.actorRole,
+      tradesmanId: booking.tradesmanId,
+    })
+  ) {
+    throw new AppError("예약 시간 변경은 전문가 또는 관리자만 할 수 있습니다.", 403);
+  }
 
   // 방문 시간 변경은 실제로 아직 진행 중인 예약에서만 허용한다.
   // 이미 끝났거나 취소된 예약 일정이 다시 바뀌면 운영 기록이 꼬이기 쉽다.

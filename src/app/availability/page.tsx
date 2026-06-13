@@ -1,6 +1,6 @@
 import { PageShell } from "@/components/shared/page-shell";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import {
   canAccessTradesmanWorkspace,
@@ -17,7 +17,7 @@ const availabilityBlocks = [
 
 export default async function AvailabilityPage() {
   const locale = await getCurrentLocale();
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const canUsePage = canAccessTradesmanWorkspace(sessionUser.role);
 
   return (
@@ -32,10 +32,10 @@ export default async function AvailabilityPage() {
       }
       description={
         locale === "ko"
-          ? "전문가 모드에서는 고객용 예약 CTA보다 일정 가능 시간이 먼저 보이는 편이 자연스럽습니다."
+          ? "고객이 예약 가능한 시간을 쉽게 확인할 수 있도록 가능 시간을 관리해 주세요."
           : locale === "fil"
-            ? "Mas natural sa tradesman mode na makita muna ang availability kaysa customer booking CTA."
-            : "In tradesman mode, availability should come before customer booking CTAs."
+            ? "Ayusin ang available hours para madaling makapili ang customer ng oras."
+            : "Set the hours customers can choose for bookings."
       }
     >
       {!canUsePage ? (

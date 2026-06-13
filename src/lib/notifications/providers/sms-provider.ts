@@ -1,19 +1,76 @@
 import { NotificationChannel } from "@prisma/client";
+import twilio from "twilio";
 
 import { prisma } from "@/lib/prisma";
 
 import type { NotificationDispatchInput, NotificationDispatchResult } from "./types";
 
+function getSmsConfig() {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID?.trim();
+  const authToken = process.env.TWILIO_AUTH_TOKEN?.trim();
+  const fromNumber = process.env.TWILIO_FROM_NUMBER?.trim();
+
+  if (!accountSid || !authToken || !fromNumber) {
+    return null;
+  }
+
+  return {
+    accountSid,
+    authToken,
+    fromNumber,
+  };
+}
+
 export async function sendSmsNotification(
   input: NotificationDispatchInput,
 ): Promise<NotificationDispatchResult> {
-  // SMS도 현재는 모의 발송 기록으로 처리한다.
-  // 실제 발송사를 붙이면 여기만 바꾸면 되도록 분리해 둔다.
+  const config = getSmsConfig();
+
+  if (!config) {
+    return {
+      channel: NotificationChannel.SMS,
+      delivered: false,
+      skippedReason: "Twilio SMS 설정이 없습니다.",
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: input.userId },
+    select: {
+      phoneNumber: true,
+    },
+  });
+
+  if (!user?.phoneNumber) {
+    return {
+      channel: NotificationChannel.SMS,
+      delivered: false,
+      skippedReason: "SMS를 보낼 사용자 전화번호가 없습니다.",
+    };
+  }
+
+  const client = twilio(config.accountSid, config.authToken);
+
+  try {
+    await client.messages.create({
+      body: `${input.title}\n${input.message}`.slice(0, 1500),
+      from: config.fromNumber,
+      to: user.phoneNumber,
+    });
+  } catch (error) {
+    return {
+      channel: NotificationChannel.SMS,
+      delivered: false,
+      skippedReason:
+        error instanceof Error ? error.message : "SMS 발송에 실패했습니다.",
+    };
+  }
+
   const notification = await prisma.notification.create({
     data: {
       userId: input.userId,
       type: input.type,
-      title: `[SMS] ${input.title}`,
+      title: input.title,
       message: input.message,
       relatedId: input.relatedId,
       relatedType: input.relatedType,

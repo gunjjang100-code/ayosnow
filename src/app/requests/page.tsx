@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { PageShell } from "@/components/shared/page-shell";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import { listReceivedQuoteRequestsForWorkspace } from "@/lib/quote-requests/list-received-requests-service";
 import {
@@ -12,7 +12,7 @@ import {
 
 export default async function RequestsPage() {
   const locale = await getCurrentLocale();
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const canUsePage = canAccessTradesmanWorkspace(sessionUser.role);
   const requestsResult = canUsePage
     ? await listReceivedQuoteRequestsForWorkspace({
@@ -33,10 +33,10 @@ export default async function RequestsPage() {
       }
       description={
         locale === "en"
-          ? "Tradesman mode should open with incoming work first, not customer shopping pages."
+          ? "Review customer requests and send quotes from one place."
           : locale === "fil"
-            ? "Dapat incoming work muna ang makita sa tradesman mode, hindi customer shopping pages."
-            : "전문가 모드에서는 고객 쇼핑 화면보다 받은 요청과 작업 검토가 먼저 보여야 합니다."
+            ? "Suriin ang customer requests at magpadala ng quotes sa iisang lugar."
+            : "고객이 보낸 요청을 확인하고 견적을 보낼 수 있습니다."
       }
     >
       {!canUsePage ? (
@@ -55,13 +55,13 @@ export default async function RequestsPage() {
             <article className="rounded-3xl border border-teal-200 bg-teal-50 px-5 py-4 text-sm text-teal-950">
               <p className="font-bold text-teal-900">
                 {requestsResult.source === "database"
-                  ? "실제 받은 요청을 보여주고 있습니다."
-                  : "아직 실제 받은 요청이 없습니다."}
+                  ? "받은 요청을 보여주고 있습니다."
+                  : "아직 받은 요청이 없습니다."}
               </p>
               <p className="mt-2 leading-6 text-teal-800">
                 {requestsResult.source === "database"
-                  ? "알림과 받은 요청 목록에서 DB에 저장된 실제 요청을 열 수 있습니다."
-                  : "전문가 기술 카테고리와 맞는 실제 요청이 생기면 여기에 표시됩니다."}
+                  ? "새로운 고객 요청을 이 화면에서 확인할 수 있습니다."
+                  : "전문가 기술 카테고리와 맞는 요청이 생기면 여기에 표시됩니다."}
               </p>
             </article>
           ) : null}

@@ -8,7 +8,6 @@ export default function SignUpPage() {
     <AuthForm
       mode="signup"
       googleEnabled={providers.google}
-      facebookEnabled={providers.facebook}
     />
   );
 }

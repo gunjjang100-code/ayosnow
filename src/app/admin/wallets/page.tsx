@@ -2,13 +2,13 @@ import { WalletTable } from "@/components/admin/WalletTable";
 import { PageShell } from "@/components/shared/page-shell";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
 import { listAdminWallets } from "@/lib/admin/wallet-admin-service";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { canAccessAdminWorkspace, getRoleAccessNoticeCopy } from "@/lib/role-ui";
 import { getCurrentLocale } from "@/lib/i18n-server";
 
 export default async function AdminWalletsPage() {
   const locale = await getCurrentLocale();
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const canUseAdminWorkspace = canAccessAdminWorkspace(sessionUser.role);
   const wallets = canUseAdminWorkspace ? await listAdminWallets() : [];
 

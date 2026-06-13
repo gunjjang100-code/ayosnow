@@ -26,6 +26,7 @@ export async function PATCH(
     const booking = await rescheduleBooking({
       bookingId: id,
       actorUserId: sessionUser.id,
+      actorRole: sessionUser.role,
       scheduledAt: new Date(parsed.data.scheduledAt),
     });
 

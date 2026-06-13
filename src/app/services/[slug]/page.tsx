@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
 import { PageShell } from "@/components/shared/page-shell";
 import { InstantBookButton } from "@/components/services/instant-book-button";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { copy } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import {
@@ -22,7 +22,7 @@ export default async function ServiceDetailPage({
   const { slug } = await params;
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const service = await getMarketplaceServiceBySlug(slug);
 
   if (!service) {
@@ -116,10 +116,10 @@ export default async function ServiceDetailPage({
             <article className="panel-shell p-6">
               <p className="text-sm font-bold text-teal-700">
                 {locale === "en"
-                  ? "Booking panel"
+                  ? "Booking"
                   : locale === "fil"
-                    ? "Booking panel"
-                    : "예약 패널"}
+                    ? "Booking"
+                    : "예약"}
               </p>
               <p className="mt-3 text-sm leading-6 text-slate-600">
                 {locale === "en"

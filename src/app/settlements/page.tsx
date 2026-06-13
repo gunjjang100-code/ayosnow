@@ -1,7 +1,7 @@
 import { PageShell } from "@/components/shared/page-shell";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
 import { TradesmanWalletTopupPanel } from "@/components/settlements/tradesman-wallet-topup-panel";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import {
   canAccessTradesmanWorkspace,
@@ -20,7 +20,7 @@ type WalletTopupHistoryItem = Awaited<
 
 export default async function SettlementsPage() {
   const locale = await getCurrentLocale();
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const canUsePage = canAccessTradesmanWorkspace(sessionUser.role);
   const canUseSelfTopup = sessionUser.role === "tradesman";
   const walletSnapshot = canUseSelfTopup
@@ -36,8 +36,8 @@ export default async function SettlementsPage() {
   return (
     <PageShell
       eyebrow="Credits"
-      title="전문가 크레딧과 견적료 차감 내역"
-      description="AyosNow MVP에서는 고객은 웹 안에서 비용 처리를 하지 않고, 전문가는 견적을 처음 제출할 때 40 PHP만 차감됩니다."
+      title="전문가 크레딧"
+      description="견적 제출에 필요한 크레딧을 충전하고 사용 내역을 확인할 수 있습니다."
     >
       {!canUsePage ? (
         <RoleAccessNotice
@@ -70,7 +70,7 @@ export default async function SettlementsPage() {
               <div>
                 <h2 className="text-xl font-bold text-slate-950">크레딧 거래 내역</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  충전은 플러스, 견적료 40 PHP 차감은 마이너스로 표시됩니다. 같은 요청의 견적 수정은 추가 차감되지 않습니다.
+                  충전과 견적 제출 비용 차감 내역을 최신순으로 확인할 수 있습니다.
                 </p>
               </div>
               <span className="chip">견적료 40 PHP</span>

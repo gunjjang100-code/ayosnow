@@ -1,6 +1,5 @@
 import type { Account, NextAuthOptions, Profile, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 import { AccountStatus, UserRole } from "@prisma/client";
 
@@ -80,6 +79,9 @@ async function ensureOAuthUser(params: {
       // passwordHash는 기존 스키마와 맞추기 위해 provider 표시만 저장한다.
       passwordHash: `oauth:${params.account?.provider ?? "unknown"}`,
       role: UserRole.CUSTOMER,
+      // Google 신규 가입자는 먼저 고객/전문가 역할을 직접 선택해야 한다.
+      // 선택 전에는 기본 고객처럼 저장하되, 화면에서는 역할 선택 페이지로 보낸다.
+      roleSelectedAt: null,
     },
   });
 
@@ -132,26 +134,11 @@ if (
   );
 }
 
-if (
-  isRealEnvValue(process.env.FACEBOOK_CLIENT_ID) &&
-  isRealEnvValue(process.env.FACEBOOK_CLIENT_SECRET)
-) {
-  providers.push(
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-    }),
-  );
-}
-
 export function getOAuthProviderStatus() {
   return {
     google:
       isRealEnvValue(process.env.GOOGLE_CLIENT_ID) &&
       isRealEnvValue(process.env.GOOGLE_CLIENT_SECRET),
-    facebook:
-      isRealEnvValue(process.env.FACEBOOK_CLIENT_ID) &&
-      isRealEnvValue(process.env.FACEBOOK_CLIENT_SECRET),
   };
 }
 
@@ -165,23 +152,27 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === "google" || account?.provider === "facebook") {
+      if (account?.provider === "google") {
         return ensureOAuthUser({ user, account, profile });
       }
 
       return true;
     },
     async jwt({ token, user }) {
-      if (user?.email) {
-        const dbUser = await findUserByEmail(user.email);
+      const email = user?.email ?? token.email;
+
+      if (email) {
+        const dbUser = await findUserByEmail(email);
 
         if (dbUser) {
           token.sub = dbUser.id;
           token.name = dbUser.fullName;
           token.email = dbUser.email;
           token.role = toAppRole(dbUser.role);
-        } else if ("role" in user) {
+          token.needsRoleSelection = dbUser.roleSelectedAt === null;
+        } else if (user && "role" in user) {
           token.role = user.role;
+          token.needsRoleSelection = user.needsRoleSelection ?? false;
         }
       }
 
@@ -191,6 +182,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.sub ?? "";
         session.user.role = (token.role as AppUserRole | undefined) ?? "customer";
+        session.user.needsRoleSelection = token.needsRoleSelection ?? false;
       }
 
       return session;

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { HomeCategoryChips } from "@/components/home/home-category-chips";
 import { InfoCard } from "@/components/shared/info-card";
 import { StatCard } from "@/components/shared/stat-card";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { copy } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import {
@@ -17,7 +17,7 @@ import { getRoleHomePath } from "@/lib/role-ui";
 export default async function HomePage() {
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
 
   if (sessionUser.role !== "customer") {
     redirect(getRoleHomePath(sessionUser.role));
@@ -64,7 +64,7 @@ export default async function HomePage() {
               <HomeCategoryChips key={locale} initialCategories={categories} />
             ) : (
               <p className="mt-8 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
-                등록된 카테고리가 아직 없습니다. 관리자에서 카테고리를 먼저 추가해 주세요.
+                현재 준비 중인 카테고리입니다. 곧 이용 가능한 서비스가 표시됩니다.
               </p>
             )}
 
@@ -125,7 +125,7 @@ export default async function HomePage() {
           <div className="grid gap-4">
             {featuredServices.length === 0 ? (
               <p className="rounded-3xl border border-dashed border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
-                아직 공개된 서비스가 없습니다. 전문가가 서비스를 등록하면 이 영역에 자동으로 표시됩니다.
+                현재 예약 가능한 서비스가 없습니다. 곧 새로운 서비스가 추가됩니다.
               </p>
             ) : null}
             {featuredServices.map((service) => (

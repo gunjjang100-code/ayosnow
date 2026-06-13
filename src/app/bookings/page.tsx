@@ -3,7 +3,7 @@ import Link from "next/link";
 import { listBookingPreviewsForUser } from "@/lib/bookings/list-bookings-service";
 import { PageShell } from "@/components/shared/page-shell";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { copy } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import type { BookingStatus } from "@/lib/types";
@@ -26,7 +26,7 @@ function getBookingActionHint(
 export default async function BookingsPage() {
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   let bookings: Awaited<ReturnType<typeof listBookingPreviewsForUser>> = [];
   let loadFailed = false;
 
@@ -48,9 +48,9 @@ export default async function BookingsPage() {
     >
       {!loadFailed ? (
         <article className="rounded-3xl border border-teal-100 bg-teal-50 px-5 py-4 text-slate-800">
-          <p className="text-sm font-bold text-teal-800">실제 예약 데이터를 보여주고 있습니다.</p>
+          <p className="text-sm font-bold text-teal-800">내 예약 현황</p>
           <p className="mt-2 text-sm leading-6 text-slate-700">
-            현재 계정 기준으로 DB에 저장된 예약만 표시합니다.
+            로그인한 계정에 연결된 예약만 표시합니다.
           </p>
         </article>
       ) : null}
@@ -59,7 +59,7 @@ export default async function BookingsPage() {
         <article className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-amber-950">
           <p className="text-sm font-bold text-amber-900">예약 데이터를 불러오지 못했습니다.</p>
           <p className="mt-2 text-sm leading-6 text-amber-800">
-            데이터 연결 또는 권한을 확인해 주세요. 임시 예약은 대신 표시하지 않습니다.
+            잠시 후 다시 시도해 주세요. 문제가 계속되면 고객센터에 문의해 주세요.
           </p>
         </article>
       ) : null}

@@ -55,9 +55,7 @@ export function TradesmanWalletTopupPanel({
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    const accepted = window.confirm(
-      `${amount} PHP 크레딧을 충전하시겠어요?\nPayMongo 웹훅 검증이 끝난 뒤에만 잔액에 반영됩니다.`,
-    );
+    const accepted = window.confirm(`${amount} PHP 크레딧을 충전하시겠어요?`);
 
     if (!accepted) {
       return;
@@ -98,7 +96,7 @@ export function TradesmanWalletTopupPanel({
         return;
       }
 
-      setSuccessMessage("PayMongo 크레딧 충전창으로 이동합니다.");
+      setSuccessMessage("결제창으로 이동합니다.");
       window.location.href = result.checkoutUrl;
     });
   }
@@ -109,11 +107,10 @@ export function TradesmanWalletTopupPanel({
         <div>
           <h2 className="text-xl font-bold text-slate-950">전문가 크레딧 충전</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            견적을 보내기 전에 먼저 크레딧을 충전하는 곳입니다. PayMongo 절차가 끝나더라도 서버가 웹훅으로
-            최종 확인한 뒤에만 잔액이 올라갑니다.
+            견적을 보내려면 크레딧이 필요합니다. 충전이 완료되면 잔액에 반영됩니다.
           </p>
         </div>
-        <span className="chip">PayMongo</span>
+        <span className="chip">GCash / Maya / Card</span>
       </div>
 
       <div className="mt-5 rounded-2xl border border-teal-100 bg-teal-50 px-4 py-3">
@@ -140,7 +137,7 @@ export function TradesmanWalletTopupPanel({
             <p className="text-sm font-medium text-slate-500">충전 패키지</p>
             <p className="mt-2 text-xl font-bold text-slate-950">+{amount} PHP</p>
             <p className="mt-2 text-xs leading-5 text-slate-500">
-              클릭하면 PayMongo 충전창으로 이동합니다.
+              클릭하면 결제창으로 이동합니다.
             </p>
           </button>
         ))}
@@ -172,8 +169,7 @@ export function TradesmanWalletTopupPanel({
       ) : null}
 
       <div className="mt-4 rounded-2xl border border-teal-100 bg-teal-50/70 px-4 py-3 text-sm leading-6 text-teal-900">
-        PayMongo 완료 화면만 보고 바로 충전하지 않습니다. PayMongo 웹훅 검증이 끝나야 실제 잔액이
-        반영됩니다.
+        결제 상태는 자동으로 확인됩니다. 충전 내역에서 완료 여부를 확인할 수 있습니다.
       </div>
     </article>
   );

@@ -1,7 +1,7 @@
 import { PageShell } from "@/components/shared/page-shell";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
 import { StatCard } from "@/components/shared/stat-card";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { listDashboardStatsForUser } from "@/lib/dashboard/list-dashboard-stats-service";
 import { copy } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
@@ -13,7 +13,7 @@ import {
 export default async function DashboardPage() {
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const canUseDashboard = canAccessTradesmanWorkspace(sessionUser.role);
   let stats: Awaited<ReturnType<typeof listDashboardStatsForUser>> = [];
   let statsLoadFailed = false;
@@ -49,12 +49,12 @@ export default async function DashboardPage() {
       {canUseDashboard ? (
         <article className="rounded-3xl border border-teal-100 bg-teal-50 px-5 py-4 text-slate-800">
           <p className="text-sm font-bold text-teal-800">
-            {statsLoadFailed ? "대시보드 수치를 불러오지 못했습니다." : "실제 대시보드 수치를 보여주고 있습니다."}
+            {statsLoadFailed ? "대시보드 수치를 불러오지 못했습니다." : "내 활동 현황"}
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-700">
             {statsLoadFailed
-              ? "데이터 연결 또는 권한을 확인해 주세요. 임시 숫자는 대신 표시하지 않습니다."
-              : "현재 로그인한 계정 기준으로 DB에서 계산한 값입니다."}
+              ? "잠시 후 다시 시도해 주세요. 문제가 계속되면 고객센터에 문의해 주세요."
+              : "현재 로그인한 계정의 요청, 예약, 알림 현황을 보여줍니다."}
           </p>
         </article>
       ) : null}

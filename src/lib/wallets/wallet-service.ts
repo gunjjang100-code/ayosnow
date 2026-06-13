@@ -5,7 +5,6 @@ import { AppError } from "@/lib/errors/app-error";
 import { prisma } from "@/lib/prisma";
 import {
   buildQuoteSubmissionFeeReferenceKey,
-  DEMO_TRADESMAN_INITIAL_CREDIT,
   QUOTE_SUBMISSION_CREDIT_COST,
 } from "@/lib/wallets/wallet-topup-config";
 
@@ -65,7 +64,7 @@ async function getLockedWalletForUser(params: {
   return wallet;
 }
 
-export { DEMO_TRADESMAN_INITIAL_CREDIT, QUOTE_SUBMISSION_CREDIT_COST };
+export { QUOTE_SUBMISSION_CREDIT_COST };
 
 export async function ensureWalletForUser(params: {
   userId: string;

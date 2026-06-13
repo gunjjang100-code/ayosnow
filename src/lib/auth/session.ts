@@ -5,7 +5,6 @@ import { getToken } from "next-auth/jwt";
 
 import { sessionCookieName } from "@/lib/auth/session-constants";
 import { authOptions } from "@/lib/auth/next-auth";
-import { demoSessions, findDemoSessionByToken } from "@/lib/demo/demo-data";
 import type { UserRole } from "@/lib/types";
 
 export interface SessionUser {
@@ -14,18 +13,7 @@ export interface SessionUser {
   name: string;
   role: UserRole;
   token: string;
-}
-
-export function isDemoSessionToken(token: string | undefined) {
-  return Boolean(token && token.startsWith("demo-"));
-}
-
-export function isDemoAuthEnabled() {
-  return process.env.NODE_ENV !== "production" || process.env.ENABLE_DEMO_AUTH === "true";
-}
-
-export function isDemoSessionUser(user: Pick<SessionUser, "token">) {
-  return isDemoSessionToken(user.token);
+  needsRoleSelection: boolean;
 }
 
 export async function verifySession(
@@ -35,48 +23,14 @@ export async function verifySession(
     return null;
   }
 
-  if (!isDemoAuthEnabled() && isDemoSessionToken(token)) {
-    return null;
-  }
-
-  try {
-    const sessionUser = await findDemoSessionByToken(token);
-    if (sessionUser) {
-      return {
-        id: sessionUser.id,
-        email: sessionUser.email,
-        name: sessionUser.name,
-        role: sessionUser.role,
-        token: sessionUser.token,
-      };
-    }
-  } catch {
-    // DB가 꺼져 있으면 demo-data 준비 과정에서 Prisma 에러가 먼저 난다.
-    // 이때는 데모 계정 목록만으로 "읽기 전용 세션"을 만들어 화면 진입을 살린다.
-  }
-
-  const fallbackSession = demoSessions.find((session) => session.token === token);
-
-  if (!fallbackSession) {
-    return null;
-  }
-
-  return {
-    // DB가 없을 때는 임시 식별자를 써서 화면만 먼저 살린다.
-    id: `demo-${fallbackSession.token}`,
-    email: fallbackSession.email,
-    name: fallbackSession.fullName,
-    role: fallbackSession.role,
-    token: fallbackSession.token,
-  };
+  // 현재 운영형 로그인은 NextAuth 세션을 기준으로 동작합니다.
+  // 사용자가 임의로 만든 session 쿠키는 신뢰하지 않습니다.
+  return null;
 }
 
 export async function verifyStrictSession(
   token: string | undefined,
 ): Promise<SessionUser | null> {
-  // API는 "쿠키가 없으면 기본 데모 계정으로 들어간다" 같은 완충 동작을 하면 안 된다.
-  // 그래서 엄격 모드에서는 토큰이 아예 없으면 바로 실패시키고,
-  // 토큰이 있을 때만 기존 검증 로직을 태운다.
   if (!token) {
     return null;
   }
@@ -93,6 +47,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
       name: nextAuthSession.user.name ?? nextAuthSession.user.email,
       role: nextAuthSession.user.role,
       token: "next-auth",
+      needsRoleSelection: nextAuthSession.user.needsRoleSelection ?? false,
     };
   }
 
@@ -102,16 +57,9 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   return verifySession(token);
 }
 
-export async function getIsCurrentSessionDemo() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(sessionCookieName)?.value;
-  return isDemoSessionToken(token);
-}
-
-export async function getDemoSessionUser(): Promise<SessionUser> {
-  // 이 함수 이름은 예전 데모 단계 이름을 유지하고 있지만,
-  // 지금 운영형 화면에서는 쿠키가 없을 때 자동으로 데모 고객을 넣지 않는다.
-  // 비로그인 방문자는 "읽기 전용 손님"으로만 렌더링하고, 실제 저장 API는 계속 401로 막는다.
+export async function getOptionalSessionUser(): Promise<SessionUser> {
+  // 비로그인 방문자는 읽기 전용 손님으로 렌더링합니다.
+  // 저장/수정 API는 getRequestSessionUser()에서 다시 인증하므로 401로 막힙니다.
   const sessionUser = await getSessionUser();
   if (sessionUser) {
     return sessionUser;
@@ -123,6 +71,7 @@ export async function getDemoSessionUser(): Promise<SessionUser> {
     name: "Guest",
     role: "customer",
     token: "",
+    needsRoleSelection: false,
   };
 }
 
@@ -141,6 +90,7 @@ export async function getRequestSessionUser(
       name: nextAuthToken.name ?? nextAuthToken.email,
       role: (nextAuthToken.role as UserRole | undefined) ?? "customer",
       token: "next-auth",
+      needsRoleSelection: nextAuthToken.needsRoleSelection ?? false,
     };
   }
 

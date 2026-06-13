@@ -3,7 +3,7 @@ import Link from "next/link";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
 import { PageShell } from "@/components/shared/page-shell";
 import { InstantBookButton } from "@/components/services/instant-book-button";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { copy } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import {
@@ -35,7 +35,7 @@ function getFallbackCategoryLabel(categorySlug: string, locale: string) {
 export default async function ServicesPage({ searchParams }: ServicesPageProps) {
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const params = searchParams ? await searchParams : undefined;
   const selectedCategorySlug = params?.category;
   const [categories, featuredServices] = await Promise.all([
@@ -109,10 +109,10 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
               </p>
               <p className="mt-3 text-sm leading-6 text-slate-600">
                 {locale === "en"
-                  ? "This usually means the category exists first and the actual service cards will be added next."
+                  ? "More services for this category will be available soon."
                   : locale === "fil"
-                    ? "Karaniwan, nauuna munang gawin ang category bago idagdag ang totoong service cards."
-                    : "보통 카테고리를 먼저 만들고, 그 다음에 실제 서비스 카드를 연결하는 흐름입니다."}
+                    ? "Magkakaroon pa ng karagdagang services para sa category na ito."
+                    : "이 카테고리의 서비스가 준비되는 대로 바로 표시됩니다."}
               </p>
             </article>
           ) : null}

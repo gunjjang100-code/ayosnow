@@ -10,7 +10,6 @@ type AuthMode = "login" | "signup";
 interface AuthFormProps {
   mode: AuthMode;
   googleEnabled: boolean;
-  facebookEnabled: boolean;
 }
 
 function getErrorMessage(error: unknown) {
@@ -22,7 +21,7 @@ function getErrorMessage(error: unknown) {
   return "요청을 처리하지 못했습니다.";
 }
 
-export function AuthForm({ mode, googleEnabled, facebookEnabled }: AuthFormProps) {
+export function AuthForm({ mode, googleEnabled }: AuthFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
@@ -37,6 +36,7 @@ export function AuthForm({ mode, googleEnabled, facebookEnabled }: AuthFormProps
     const email = String(formData.get("email") ?? "");
     const password = String(formData.get("password") ?? "");
     const fullName = String(formData.get("fullName") ?? "");
+    const phoneNumber = String(formData.get("phoneNumber") ?? "");
     const role = String(formData.get("role") ?? "customer");
 
     startTransition(async () => {
@@ -49,6 +49,7 @@ export function AuthForm({ mode, googleEnabled, facebookEnabled }: AuthFormProps
             },
             body: JSON.stringify({
               fullName,
+              phoneNumber,
               email,
               password,
               role,
@@ -83,7 +84,7 @@ export function AuthForm({ mode, googleEnabled, facebookEnabled }: AuthFormProps
     });
   }
 
-  function handleOAuth(provider: "google" | "facebook") {
+  function handleOAuth(provider: "google") {
     void signIn(provider, { callbackUrl });
   }
 
@@ -95,8 +96,8 @@ export function AuthForm({ mode, googleEnabled, facebookEnabled }: AuthFormProps
           {mode === "signup" ? "AyosNow 가입하기" : "AyosNow 로그인"}
         </h1>
         <p className="mt-4 text-sm leading-6 text-slate-600">
-          Google, Facebook 또는 이메일로 가입할 수 있습니다. 전문가로 활동하려면 이메일 가입에서
-          전문가 역할을 선택해 주세요.
+          Google 또는 이메일로 가입할 수 있습니다. 전문가로 활동하려면 이메일 가입에서 전문가
+          역할을 선택해 주세요.
         </p>
 
         <div className="mt-6 grid gap-3">
@@ -108,17 +109,9 @@ export function AuthForm({ mode, googleEnabled, facebookEnabled }: AuthFormProps
           >
             Google로 계속하기
           </button>
-          <button
-            type="button"
-            disabled={!facebookEnabled}
-            onClick={() => handleOAuth("facebook")}
-            className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-800 transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Facebook으로 계속하기
-          </button>
-          {(!googleEnabled || !facebookEnabled) ? (
+          {!googleEnabled ? (
             <p className="text-xs leading-5 text-amber-700">
-              OAuth 버튼을 쓰려면 `.env`에 Google/Facebook Client ID와 Secret을 넣어야 합니다.
+              Google 로그인을 쓰려면 `.env`에 Google Client ID와 Secret을 넣어야 합니다.
             </p>
           ) : null}
         </div>
@@ -148,6 +141,19 @@ export function AuthForm({ mode, googleEnabled, facebookEnabled }: AuthFormProps
                   <option value="customer">고객으로 가입</option>
                   <option value="tradesman">전문가로 가입</option>
                 </select>
+              </label>
+              <label className="grid gap-2 text-sm font-bold text-slate-800">
+                전화번호
+                <input
+                  name="phoneNumber"
+                  type="tel"
+                  inputMode="tel"
+                  className="rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-teal-300"
+                  placeholder="+639171234567"
+                />
+                <span className="text-xs font-medium leading-5 text-slate-500">
+                  SMS 알림을 받으려면 국가번호를 포함해 입력해 주세요. 비워도 가입은 가능합니다.
+                </span>
               </label>
             </>
           ) : null}

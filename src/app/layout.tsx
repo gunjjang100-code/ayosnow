@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 
 import "@/app/globals.css";
+import { RoleSelectionRedirect } from "@/components/auth/role-selection-redirect";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import {
   countUnreadNotificationsForUser,
@@ -15,7 +16,7 @@ import { getWalletSnapshotForUser } from "@/lib/wallets/wallet-service";
 
 export const metadata: Metadata = {
   title: "AyosNow",
-  description: "Hybrid trades marketplace MVP for the Philippines",
+  description: "필리핀 홈서비스 예약과 견적 비교 플랫폼",
   applicationName: "AyosNow",
   appleWebApp: {
     capable: true,
@@ -37,7 +38,7 @@ export default async function RootLayout({
   children: ReactNode;
 }>) {
   const locale = await getCurrentLocale();
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   let initialUnreadCount = 0;
   let initialNotifications: NotificationListItem[] = [];
   let walletBalance: number | null = null;
@@ -66,6 +67,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} translate="no" className="notranslate">
       <body className="notranslate">
+        <RoleSelectionRedirect enabled={sessionUser.needsRoleSelection} />
         <SiteHeader
           locale={locale}
           role={sessionUser.role}

@@ -137,6 +137,7 @@ model User {
   fullName               String
   phoneNumber            String?
   role                   UserRole                   @default(CUSTOMER)
+  roleSelectedAt         DateTime?
   status                 AccountStatus              @default(ACTIVE)
   city                   String?
   barangay               String?
@@ -222,6 +223,12 @@ model ServiceCategory {
   slug            String                   @unique
   name            String
   description     String
+  nameKo          String?
+  nameFil         String?
+  nameEn          String?
+  descriptionKo   String?
+  descriptionFil  String?
+  descriptionEn   String?
   iconName        String?
   isActive        Boolean                  @default(true)
   featured        Boolean                  @default(false)

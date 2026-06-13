@@ -4,7 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { BookingActions } from "@/components/bookings/booking-actions";
 import { BookingChatButton } from "@/components/chat/booking-chat-button";
 import { PageShell } from "@/components/shared/page-shell";
-import { getDemoSessionUser, isAdmin } from "@/lib/auth/session";
+import { getOptionalSessionUser, isAdmin } from "@/lib/auth/session";
 import {
   getBookingNextStepLabel,
   getBookingStatusDescription,
@@ -52,7 +52,7 @@ export default async function BookingDetailPage({
   const { id } = await params;
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   let booking: BookingDetailRecord | null = null;
 
   try {

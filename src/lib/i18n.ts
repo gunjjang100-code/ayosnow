@@ -50,29 +50,23 @@ export const copy = {
   ko: {
     siteName: "AyosNow",
     siteTagline: "필리핀 홈서비스",
-    demoModeBannerTitle: "데모 모드로 보고 있습니다.",
-    demoModeBannerDescription:
-      "현재 화면은 로그인한 계정의 실제 데이터를 우선 사용합니다.",
-    demoModePageTitle: "현재 데모 모드 화면입니다.",
-    demoModePageDescription:
-      "이 화면은 저장된 실제 데이터를 기준으로 동작합니다.",
     profile: "내 프로필",
     startRequest: "요청 시작",
     languageLabel: "언어",
     footerIntro:
-      "필리핀 시장에 맞춘 서비스 중개 플랫폼 MVP 구조입니다. 바로 예약과 견적 요청 흐름을 한곳에서 다룹니다.",
+      "필리핀에서 필요한 홈서비스를 쉽고 빠르게 찾을 수 있는 서비스 플랫폼입니다.",
     footerFlowTitle: "핵심 흐름",
     footerFlowText:
       "서비스 탐색 → 채팅 → 예약 확정 → 리뷰까지 한 줄로 이어집니다.",
-    footerOpsTitle: "관리 포인트",
+    footerOpsTitle: "안심 이용",
     footerOpsText:
-      "전문가 승인, 원아웃 정책, 분쟁 처리, 크레딧 관리 흐름을 미리 고려했습니다.",
-    homeEyebrow: "Pinaghalong Marketplace ng Tradesmen",
+      "전문가 승인, 신고 처리, 리뷰 관리를 통해 더 안전한 이용 환경을 만듭니다.",
+    homeEyebrow: "필리핀 홈서비스",
     homeTitleTop: "필리핀 사용자에게 맞춘",
     homeTitleAccent: "바로 예약 + 견적 비교",
     homeTitleBottom: "서비스 플랫폼",
     homeDescription:
-      "급한 작업은 서비스 목록에서 바로 예약하고, 범위가 큰 작업은 요청서를 올려 여러 전문가의 견적을 비교하는 구조입니다. 쉽게 말해 퀵 주문과 맞춤 비교 견적을 한 집에 넣은 형태입니다.",
+      "급한 작업은 서비스 목록에서 바로 예약하고, 범위가 큰 작업은 요청서를 올려 여러 전문가의 견적을 비교할 수 있습니다.",
     homePrimaryCta: "바로 예약 보러가기",
     homeSecondaryCta: "견적 요청 시작하기",
     instantFlowTitle: "즉시 예약 흐름",
@@ -88,13 +82,13 @@ export const copy = {
     homeCustomerHelper:
       "급한 일은 바로 예약, 큰 일은 견적 비교로 나눠서 선택할 수 있게 설계했습니다.",
     homeTradesmanValueLabel: "전문가용 핵심 가치",
-    homeTradesmanValue: "서비스 + 입찰 동시 운영",
+    homeTradesmanValue: "서비스 + 견적 제안",
     homeTradesmanHelper:
       "서비스 등록으로 고정 매출을 만들고, 추가로 견적 요청도 받을 수 있습니다.",
     homeAdminValueLabel: "운영자용 핵심 가치",
     homeAdminValue: "승인·분쟁 흐름 포함",
     homeAdminHelper:
-      "전문가 승인, 원아웃 정책, 거래 모니터링 구조를 MVP부터 고려했습니다.",
+      "전문가 승인, 신고 처리, 계정 관리를 통해 서비스 품질을 관리합니다.",
     homeFeaturedTitle: "바로 예약 추천 서비스",
     homeFeaturedDescription: "가격대가 비교적 명확하고, 고객이 빠르게 결정하기 쉬운 작업입니다.",
     homeOpenRequestsTitle: "현재 열린 견적 요청",
@@ -109,13 +103,14 @@ export const copy = {
     homeStep2: "전문가 선택과 실시간 채팅",
     homeStep3: "전문가와 일정 확정",
     homeStep4: "작업 완료 후 리뷰 공개",
-    categoriesTitle: "초기 카테고리는 작게 시작하고 쉽게 늘릴 수 있게 설계합니다.",
+    categoriesEyebrow: "서비스 카테고리",
+    categoriesTitle: "필요한 작업을 카테고리에서 빠르게 찾아보세요.",
     categoriesDescription:
-      "카테고리를 enum으로 묶어 버리면 나중에 추가할 때 개발 비용이 커집니다. 그래서 MVP부터 카테고리를 데이터처럼 다루는 구조를 잡았습니다.",
-    servicesEyebrow: "Agarang Booking",
-    servicesTitle: "가격과 범위가 비교적 분명한 서비스는 바로 예약 흐름으로 처리합니다.",
+      "청소, 수리, 설치, 이사처럼 자주 필요한 홈서비스를 한곳에서 둘러볼 수 있습니다.",
+    servicesEyebrow: "바로 예약",
+    servicesTitle: "원하는 서비스를 고르고 바로 예약해 보세요.",
     servicesDescription:
-      "TaskRabbit처럼 고객이 서비스를 먼저 보고 빠르게 예약할 수 있는 공간입니다. 서비스 카드에는 가격대, 평점, 방문 가능 시간, 전문가 정보를 함께 보여줍니다.",
+      "가격대, 지역, 전문가 평점을 확인한 뒤 마음에 드는 서비스를 선택할 수 있습니다.",
     servicesRatingLabel: "평점",
     servicesReviewsSuffix: "개",
     servicesProfileLink: "전문가 프로필",
@@ -124,10 +119,10 @@ export const copy = {
     servicesBookingSuccess: "예약이 생성되었고 전문가 알림도 함께 등록되었습니다.",
     servicesBookingError: "예약 생성에 실패했습니다. 로그인 상태와 입력값을 확인해 주세요.",
     servicesBookingGoTo: "예약 상세로 이동",
-    quoteRequestEyebrow: "Hiling ng Quote",
-    quoteRequestTitle: "범위가 애매한 작업은 요청서를 먼저 받고, 여러 전문가가 입찰하도록 설계합니다.",
+    quoteRequestEyebrow: "견적 요청",
+    quoteRequestTitle: "작업 내용을 남기면 전문가가 견적을 제안합니다.",
     quoteRequestDescription:
-      "숨고처럼 요청서를 올리면 가까운 전문가에게 알림을 보내고, 고객은 금액과 메시지, 평점을 비교해 한 명을 선택하는 흐름입니다.",
+      "원하는 작업, 위치, 희망 날짜를 알려주면 조건에 맞는 전문가가 견적을 보냅니다.",
     quoteRequestServiceType: "서비스 종류",
     quoteRequestTitleLabel: "요청 제목",
     quoteRequestTitlePlaceholder: "예: 거실 벽면 부분 페인트",
@@ -149,21 +144,21 @@ export const copy = {
     quoteRequestSuccess: "요청서가 등록되었습니다.",
     quoteRequestMatchedExperts: "매칭된 전문가:",
     quoteRequestSeeDetails: "상세 보기",
-    quoteRequestPreviewButton: "요청서 미리보기",
+    quoteRequestPreviewButton: "요청 내용 확인",
     quoteRequestSubmitError: "요청서를 등록하지 못했습니다. 입력값을 확인한 뒤 다시 시도해 주세요.",
-    quoteRequestFlowTitle: "시스템 동작",
+    quoteRequestFlowTitle: "진행 방식",
     quoteRequestFlow1: "1. 카테고리와 지역이 맞는 전문가에게만 알림을 보냅니다.",
     quoteRequestFlow2: "2. 전문가가 금액, 방문 가능 시간, 메시지를 포함해 견적을 보냅니다.",
     quoteRequestFlow3: "3. 고객은 가격만이 아니라 평점, 완료 작업 수, 응답 속도까지 함께 비교합니다.",
-    quoteRequestFlow4: "4. 한 명을 선택하면 먼저 예약이 생성되고, 그 뒤 작업 채팅으로 이어집니다.",
-    quoteRequestValidationTitle: "입력 검증 기준",
-    quoteRequestValidation1: "제목은 2자 이상, 설명은 2자 이상이면 짧게 적어도 제출할 수 있습니다.",
-    quoteRequestValidation2: "예산 범위는 최소값과 최대값의 순서를 검사합니다.",
-    quoteRequestValidation3: "사용자가 보낸 `userId`는 믿지 않고 서버 세션으로 소유자를 결정합니다.",
-    quotesEyebrow: "Mga Quote",
+    quoteRequestFlow4: "4. 마음에 드는 견적을 선택하면 채팅과 예약으로 이어집니다.",
+    quoteRequestValidationTitle: "작성 팁",
+    quoteRequestValidation1: "작업 위치와 원하는 날짜를 적어 주세요.",
+    quoteRequestValidation2: "예산 범위를 적으면 전문가가 더 정확하게 제안할 수 있습니다.",
+    quoteRequestValidation3: "사진이나 현장 상황을 자세히 쓰면 상담 시간이 줄어듭니다.",
+    quotesEyebrow: "견적 목록",
     quotesTitle: "고객은 받은 견적을 한 화면에서 비교하고, 가장 맞는 전문가를 선택할 수 있습니다.",
     quotesDescription:
-      "금액만 비교하면 싼 견적에만 쏠릴 수 있습니다. 그래서 메시지 품질, 평점, 완료 작업 수, 방문 시간을 함께 보여주는 구조로 잡았습니다.",
+      "금액뿐 아니라 메시지, 평점, 완료 작업 수, 방문 가능 시간을 함께 보고 선택할 수 있습니다.",
     quotesActiveRequest: "현재 비교 중인 요청",
     quotesReceivedCount: "받은 견적",
     quotesRatingLabel: "평점",
@@ -182,11 +177,11 @@ export const copy = {
     quotesSelectSuccess: "견적이 예약과 작업 채팅으로 연결되었습니다.",
     quotesSelectError: "견적 선택에 실패했습니다.",
     quotesChatAfterBookingHint:
-      "견적을 선택하면 실제 예약과 작업 채팅방이 함께 준비됩니다.",
-    chatEyebrow: "Realtime na Usapan",
-    chatTitle: "채팅은 예약과 작업 맥락이 끊기지 않도록 작업 단위로 연결합니다.",
+      "견적을 선택하면 예약과 작업 채팅방이 함께 준비됩니다.",
+    chatEyebrow: "채팅",
+    chatTitle: "전문가와 작업 내용을 바로 상담하세요.",
     chatDescription:
-      "단순 메신저가 아니라 어떤 예약과 연결된 대화인지 같이 보여줘야 분쟁과 일정 변경 대응이 쉬워집니다.",
+      "견적과 예약에 연결된 대화가 이곳에 모입니다. 일정, 방문 전 확인 사항, 작업 내용을 편하게 주고받을 수 있습니다.",
     chatListTitle: "대화 목록",
     chatNewMessage: "새 메시지",
     chatInputPlaceholder: "작업 관련 내용을 입력해 주세요.",
@@ -211,28 +206,25 @@ export const copy = {
     chatBubble1: "오늘 방문 전에 모델 사진을 한 장 더 보내주실 수 있을까요?",
     chatBubble2: "네, 지금 바로 올릴게요. 필터 쪽 사진도 함께 보내겠습니다.",
     chatBubble3: "감사합니다. 필요한 부품이 있으면 도착 전에 미리 말씀드릴게요.",
-    chatInfo1: "텍스트, 이미지, 작업 연결 정보가 한 화면에 모이는 구조를 상정했습니다.",
-    chatInfo2: "다음 단계에서는 WebSocket 또는 Supabase Realtime 같은 실시간 채팅 엔진을 붙이면 됩니다.",
-    bookingsEyebrow: "Mga Booking",
-    bookingsTitle: "예약은 상태가 단순해야 운영이 편합니다.",
+    chatInfo1: "메시지와 사진을 함께 남겨 작업 내용을 정확하게 공유할 수 있습니다.",
+    chatInfo2: "필요한 내용은 작업별 대화 안에서 계속 확인할 수 있습니다.",
+    bookingsEyebrow: "예약",
+    bookingsTitle: "예약한 서비스의 진행 상태를 확인하세요.",
     bookingsDescription:
-      "`pending → accepted → in-progress → completed` 흐름을 기본으로 하고, 중간에 취소되면 `cancelled`로 분기하는 단순한 상태 모델을 사용합니다.",
+      "전문가 수락, 작업 시작, 작업 완료까지 예약 상태를 한 화면에서 볼 수 있습니다.",
     bookingsCustomerLabel: "고객",
     bookingsTradesmanLabel: "전문가",
     bookingsDetailButton: "상세 보기",
     bookingsManageButton: "상세 · 작업 관리",
     bookingsDetailGuideTitle: "채팅과 다음 단계는 예약 상세에서 확인합니다.",
     bookingsDetailGuideDescription:
-      "아래 카드의 `상세 · 작업 관리` 버튼을 누르면 채팅 버튼, 다음 단계 안내, 일정 변경, 작업 완료 처리 화면으로 들어갑니다.",
-    bookingsSourceLiveTitle: "실제 예약 데이터를 먼저 보여주고 있습니다.",
+      "예약 카드에서 상세 화면으로 들어가면 채팅, 일정 변경, 작업 완료 처리를 확인할 수 있습니다.",
+    bookingsSourceLiveTitle: "내 예약 현황",
     bookingsSourceLiveDescription:
-      "현재 로그인한 계정 기준으로 DB 예약을 먼저 읽었습니다. 데모 계정이라도 실제 예약이 있으면 그 목록을 우선 보여줍니다.",
-    bookingsSourceDemoTitle: "데모 예약 목록을 보여주고 있습니다.",
-    bookingsSourceDemoDescription:
-      "아직 실제 예약이 없거나 데이터 연결이 되지 않아 예약 목록이 비어 있습니다.",
-    bookingsEmptyTitle: "아직 실제 예약이 없습니다.",
+      "현재 계정에 연결된 예약만 표시합니다.",
+    bookingsEmptyTitle: "아직 예약이 없습니다.",
     bookingsEmptyDescription:
-      "서비스 예약이나 견적 선택이 완료되면 이 목록에 실제 예약 카드가 나타납니다.",
+      "서비스 예약이나 견적 선택이 완료되면 이 목록에 예약 카드가 나타납니다.",
     bookingsActionHintManage: "상세 페이지에서 일정 변경과 작업 완료를 처리할 수 있습니다.",
     bookingsActionHintPending: "먼저 전문가 수락이 끝나야 작업 완료 단계로 넘어갈 수 있습니다.",
     bookingsActionHintReadOnly: "이 예약은 현재 상세 확인 중심으로 보는 단계입니다.",
@@ -277,13 +269,6 @@ export const copy = {
     bookingActionsStatusNoteLabel: "다음 단계 안내",
     bookingDetailCompletedAtLabel: "완료 시각",
     bookingDetailAmountPending: "현장 확인 후 확정",
-    bookingDetailDemoNoticeTitle: "데모 예약 상세 화면입니다.",
-    bookingDetailDemoNoticeDescription:
-      "이 예약은 저장된 예약에서만 채팅과 일정 변경이 동작합니다.",
-    bookingDetailDemoActionDescription:
-      "현재 보고 있는 예약은 데모 데이터지만, 화면 흐름을 확인할 수 있도록 일정 변경과 완료 처리를 미리 눌러볼 수 있습니다.",
-    bookingDetailDemoChatHint:
-      "데모 채팅 화면으로 이동해 작업 대화 레이아웃을 미리 볼 수 있습니다.",
     profileEyebrow: "Profile",
     profileTitle: "고객과 전문가 모두 기본 프로필을 중심으로 활동 내역을 모아봅니다.",
     profileDescription:
@@ -295,16 +280,13 @@ export const copy = {
     profileMyRequests: "내 요청서",
     profileMyBookings: "내 예약",
     profileQuoteCount: "견적",
-    dashboardEyebrow: "Buod",
-    dashboardTitleSuffix: "님의 MVP 대시보드",
+    dashboardEyebrow: "대시보드",
+    dashboardTitleSuffix: "님의 대시보드",
     dashboardDescription:
-      "지금은 임시 세션 데이터를 사용하고 있지만, 구조는 고객과 전문가 대시보드를 나눠서 확장하기 쉽게 잡았습니다.",
-    dashboardSourceLiveTitle: "실제 대시보드 수치를 먼저 보여주고 있습니다.",
+      "요청, 예약, 알림, 크레딧 현황을 한곳에서 확인할 수 있습니다.",
+    dashboardSourceLiveTitle: "내 활동 요약",
     dashboardSourceLiveDescription:
-      "현재 계정 기준으로 DB 통계를 먼저 계산했습니다. 실제 데이터가 있으면 데모 숫자보다 그 값을 우선 보여줍니다.",
-    dashboardSourceDemoTitle: "데모 대시보드 수치를 보여주고 있습니다.",
-    dashboardSourceDemoDescription:
-      "아직 실제 통계를 읽을 수 없어서 예시 숫자로 흐름을 먼저 확인하는 상태입니다.",
+      "현재 계정의 요청, 예약, 알림, 크레딧 상태를 요약해서 보여줍니다.",
     dashboardNotificationTitle: "전문가 알림함",
     dashboardNotificationDescription:
       "새 예약과 새 견적 요청이 여기로 들어옵니다. 읽음 처리와 전체 읽음 처리도 이곳에서 바로 할 수 있습니다.",
@@ -322,7 +304,6 @@ export const copy = {
     notificationsEmailHint: "이메일",
     notificationsPushHint: "푸시",
     notificationsSmsHint: "SMS",
-    sessionSwitcherLabel: "데모 계정",
     sessionCustomerLabel: "고객 Maria",
     sessionTradesmanJoseLabel: "전문가 Jose",
     sessionTradesmanMiguelLabel: "전문가 Miguel",
@@ -332,21 +313,21 @@ export const copy = {
     dashboardCustomerTitle: "고객 화면에서 보여줄 것",
     dashboardCustomer1: "내 요청서 상태와 받은 견적 수",
     dashboardCustomer2: "다가오는 예약 일정과 채팅 바로가기",
-    dashboardCustomer3: "결제 보류 상태와 리뷰 작성 유도",
+    dashboardCustomer3: "예약 확정 상태와 리뷰 작성 안내",
     dashboardTradesmanTitle: "전문가 화면에서 보여줄 것",
-    dashboardTradesman1: "새 견적 요청 알림과 입찰 제출 버튼",
+    dashboardTradesman1: "새 견적 요청 알림과 견적 제출 버튼",
     dashboardTradesman2: "서비스 목록과 예약 수락 대기 상태",
     dashboardTradesman3: "크레딧 잔액과 견적료 차감 내역",
     adminEyebrow: "Admin",
     adminTitle: "관리자는 거래를 보는 사람을 넘어, 신뢰를 지키는 운영자여야 합니다.",
     adminDescription:
-      "MVP라도 관리자 기능을 마지막에 붙이면 사고 대응이 어렵습니다. 그래서 전문가 승인, 분쟁 처리, 계정 정지 흐름을 초기에 구조로 포함했습니다.",
+      "전문가 승인, 분쟁 처리, 계정 정지 기능으로 서비스 품질과 이용자 안전을 관리합니다.",
     adminOneOutTitle: "원아웃 정책",
     adminOneOut1: "심각한 불만이 확인되면 전문가 계정을 즉시 정지 후보로 올립니다.",
     adminOneOut2: "운영자는 채팅, 작업 사진, 신고 내용, 리뷰를 함께 보고 판단합니다.",
-    adminOneOut3: "정지 처리는 사용자 입력이 아니라 서버 권한과 관리자 판단으로만 수행합니다.",
+    adminOneOut3: "정지 처리는 관리자 검토와 승인 절차를 거쳐서만 진행합니다.",
     adminEditHint:
-      "아래 패널은 관리자가 직접 수정하거나 승인할 대상입니다. 쉽게 말해 운영자가 조종석에서 손대는 스위치 모음입니다.",
+      "아래 패널에서 승인, 카테고리, 크레딧, 신고 관련 운영 업무를 처리할 수 있습니다.",
     adminCategoriesPanel: "카테고리 관리",
     adminCategoriesDescription:
       "카테고리 추가, 노출 순서 변경, 비활성화를 한곳에서 관리합니다.",
@@ -357,7 +338,7 @@ export const copy = {
     adminCategoryCancelEditAction: "수정 취소",
     adminCategoryFormTitle: "새 카테고리 입력",
     adminCategoryFormDescription:
-      "여기서 추가한 카테고리는 아래 목록에 바로 붙습니다. 쉽게 말해 관리자 미리보기 화면에서 새 진열 칸을 만드는 단계입니다.",
+      "추가한 카테고리는 고객 화면의 카테고리 목록에 표시됩니다.",
     adminCategoryEditTitle: "카테고리 수정",
     adminCategoryEditDescription:
       "기존 카테고리의 이름, 설명, 노출 순서를 바로 고칠 수 있습니다. 진열된 안내판 글씨를 다시 붙이는 느낌으로 생각하면 됩니다.",
@@ -444,25 +425,19 @@ export const copy = {
     tradesmanCertificates: "자격증",
     tradesmanPortfolio: "포트폴리오",
     tradesmanReviews: "리뷰",
-    notFoundTitle: "요청한 전문가 페이지를 찾지 못했습니다.",
+    notFoundTitle: "요청한 페이지를 찾지 못했습니다.",
     notFoundDescription:
-      "주소가 잘못되었거나 아직 준비되지 않은 프로필일 수 있습니다. 아래 버튼으로 홈으로 돌아가 다시 탐색해 주세요.",
+      "주소가 잘못되었거나, 로그인 권한이 필요한 화면일 수 있습니다. 아래 버튼으로 홈으로 돌아가 다시 탐색해 주세요.",
     notFoundButton: "홈으로 돌아가기",
   },
   fil: {
     siteName: "AyosNow",
     siteTagline: "Serbisyong Bahay",
-    demoModeBannerTitle: "Nasa demo mode ka ngayon.",
-    demoModeBannerDescription:
-      "Ang screen na ito ay gumagamit ng demo account at halimbawang data. Maaaring iba ito sa tunay na nai-save na resulta.",
-    demoModePageTitle: "Ito ay demo mode screen.",
-    demoModePageDescription:
-      "Ang ilang listahan at button sa screen na ito ay preview o sample data lamang. Pakiwalay ito sa tunay na operational data.",
     profile: "Profile Ko",
     startRequest: "Simulan ang Request",
     languageLabel: "Wika",
     footerIntro:
-      "Ito ang MVP structure ng service marketplace para sa Pilipinas. Pinagsasama nito ang instant booking at quote request sa iisang daloy.",
+      "Isang home service platform para mas madaling makahanap, makipag-chat, at mag-book ng tradesman sa Pilipinas.",
     footerFlowTitle: "Pangunahing Daloy",
     footerFlowText:
       "Paghahanap ng serbisyo → chat → confirmed booking → review sa iisang flow.",
@@ -496,7 +471,7 @@ export const copy = {
     homeAdminValueLabel: "Halaga para sa admin",
     homeAdminValue: "Kasama ang approval at dispute flow",
     homeAdminHelper:
-      "Mula MVP pa lang, isinama na ang approval, one-out policy, at transaction monitoring.",
+      "Pinapadali ng approval, reports, at account controls ang mas ligtas na operasyon.",
     homeFeaturedTitle: "Recommended instant-book services",
     homeFeaturedDescription:
       "Ito ang mga trabahong mas malinaw ang presyo kaya mas mabilis magdesisyon ang customer.",
@@ -512,13 +487,14 @@ export const copy = {
     homeStep2: "Pumili ng tradesman at mag-chat",
     homeStep3: "Kumpirmahin ang schedule sa tradesman",
     homeStep4: "Tapusin ang trabaho at mag-iwan ng review",
-    categoriesTitle: "Maliit muna ang panimulang categories, pero madaling palawakin sa susunod.",
+    categoriesEyebrow: "Service categories",
+    categoriesTitle: "Hanapin agad ang kailangan mong trabaho ayon sa category.",
     categoriesDescription:
-      "Kapag ginawang enum agad ang categories, mas mahal baguhin sa future. Kaya mula MVP pa lang, data-driven na ang category structure.",
+      "Makikita rito ang karaniwang home services gaya ng cleaning, repair, installation, at moving.",
     servicesEyebrow: "Instant Booking",
     servicesTitle: "Ang mga serbisyong malinaw ang presyo at saklaw ay puwedeng idaan sa instant booking.",
     servicesDescription:
-      "Parang TaskRabbit, makikita muna ng customer ang serbisyo at mabilis siyang makakapag-book. Makikita sa card ang presyo, rating, availability, at tradesman info.",
+      "Tingnan ang presyo, lugar, rating, at tradesman bago pumili ng service.",
     servicesRatingLabel: "Rating",
     servicesReviewsSuffix: "reviews",
     servicesProfileLink: "Tradesman profile",
@@ -552,7 +528,7 @@ export const copy = {
     quoteRequestSuccess: "Naipadala ang request.",
     quoteRequestMatchedExperts: "Mga tumugmang expert:",
     quoteRequestSeeDetails: "Tingnan ang detalye",
-    quoteRequestPreviewButton: "Preview request",
+    quoteRequestPreviewButton: "Review request",
     quoteRequestSubmitError:
       "Hindi naisumite ang request. Pakisuri ang mga sagot at subukan ulit.",
     quoteRequestFlowTitle: "Paano gumagana",
@@ -586,11 +562,11 @@ export const copy = {
     quotesSelectSuccess: "Naging booking at work chat ang napiling quote.",
     quotesSelectError: "Hindi mapili ang quote.",
     quotesChatAfterBookingHint:
-      "Kapag pinili ang quote, sabay na ihahanda ang totoong booking at work chat.",
-    chatEyebrow: "Realtime Chat",
-    chatTitle: "Ang chat ay nakakabit sa mismong trabaho para hindi maputol ang konteksto ng booking.",
+      "Kapag pinili ang quote, sabay na ihahanda ang booking at work chat.",
+    chatEyebrow: "Chat",
+    chatTitle: "Makipag-usap sa tradesman tungkol sa trabaho.",
     chatDescription:
-      "Hindi ito simpleng messenger lang. Mahalaga na makitang konektado ang usapan sa booking para mas madali ang dispute at schedule changes.",
+      "Dito makikita ang mga usapan na konektado sa quote at booking, kasama ang schedule at work details.",
     chatListTitle: "Mga usapan",
     chatNewMessage: "New messages",
     chatInputPlaceholder: "I-type ang kailangan tungkol sa trabaho.",
@@ -615,12 +591,12 @@ export const copy = {
     chatBubble1: "Puwede po bang magpadala pa ng isang larawan ng model bago ako pumunta?",
     chatBubble2: "Oo, ipapadala ko ngayon kasama ang larawan ng filter section.",
     chatBubble3: "Salamat. Kapag may kailangang parts, sasabihin ko agad bago ako bumiyahe.",
-    chatInfo1: "Ipinapakita rito ang setup kung saan magkakasama ang text, image, at work context sa iisang screen.",
-    chatInfo2: "Sa susunod na step, puwede nang ikabit ang real-time engine gaya ng WebSocket o Supabase Realtime.",
+    chatInfo1: "Mas malinaw ang trabaho kapag kasama sa usapan ang mensahe at larawan.",
+    chatInfo2: "Makikita mo rito ang mga kailangan mong balikan bago at pagkatapos ng trabaho.",
     bookingsEyebrow: "Bookings",
-    bookingsTitle: "Mas madaling i-operate ang booking kapag simple ang status model.",
+    bookingsTitle: "Tingnan ang status ng iyong mga booking.",
     bookingsDescription:
-      "Ginagamit ang `pending → accepted → in-progress → completed` bilang pangunahing daloy, at `cancelled` para sa hiwalay na kanselasyon.",
+      "Makikita rito kung naghihintay pa, tinanggap na, ginagawa na, o tapos na ang booking.",
     bookingsCustomerLabel: "Customer",
     bookingsTradesmanLabel: "Tradesman",
     bookingsDetailButton: "Tingnan ang detalye",
@@ -630,10 +606,7 @@ export const copy = {
       "Pindutin ang `Detalye at booking actions` sa card sa ibaba para pumunta sa chat button, next-step guide, reschedule, at complete screen.",
     bookingsSourceLiveTitle: "Ipinapakita muna ang totoong booking data.",
     bookingsSourceLiveDescription:
-      "Binasa muna ang mga booking mula sa DB ng kasalukuyang account. Kahit demo account, uunahin pa rin ang totoong booking kapag mayroon.",
-    bookingsSourceDemoTitle: "Demo booking list ang ipinapakita ngayon.",
-    bookingsSourceDemoDescription:
-      "Kapag wala pang totoong booking o hindi makakonekta sa DB, ginagamit muna ang sample booking cards para makita ang daloy.",
+      "Binasa muna ang naka-save na bookings ng kasalukuyang account. Kapag wala pa, empty state ang ipapakita.",
     bookingsEmptyTitle: "Wala pang totoong booking.",
     bookingsEmptyDescription:
       "Lalabas dito ang totoong booking cards kapag natapos ang instant booking o quote selection.",
@@ -685,17 +658,10 @@ export const copy = {
     bookingActionsStatusNoteLabel: "Gabay sa susunod na step",
     bookingDetailCompletedAtLabel: "Oras ng pagtatapos",
     bookingDetailAmountPending: "Kukumpirmahin pagkatapos ng site check",
-    bookingDetailDemoNoticeTitle: "Demo booking detail ito.",
-    bookingDetailDemoNoticeDescription:
-      "Sample data lang ito para makita ang screen. Gumagana lang ang tunay na chat at booking actions kapag totoong DB booking na.",
-    bookingDetailDemoActionDescription:
-      "Demo data ito, pero puwede mo pa ring pindutin ang reschedule at complete para makita ang daloy ng screen.",
-    bookingDetailDemoChatHint:
-      "Puwede kang lumipat sa demo chat screen para makita ang layout ng usapan sa trabaho.",
     profileEyebrow: "Profile",
     profileTitle: "Sa basic profile view, makikita agad ng customer o tradesman ang mahahalagang activity.",
     profileDescription:
-      "Sa maagang MVP, mas praktikal ang malinaw na summary ng requests at bookings kaysa sobrang daming settings.",
+      "Makikita rito ang mahahalagang detalye ng account, requests, at bookings.",
     profileAccountType: "Customer account",
     profilePaymentMethod: "Main service area: Quezon City",
     profilePreferredCategories: "Preferred categories: Aircon Cleaning, Cleaning, Plumbing",
@@ -704,15 +670,12 @@ export const copy = {
     profileMyBookings: "My bookings",
     profileQuoteCount: "quotes",
     dashboardEyebrow: "Dashboard",
-    dashboardTitleSuffix: "'s MVP dashboard",
+    dashboardTitleSuffix: "'s dashboard",
     dashboardDescription:
-      "Temporary session data pa lang ang gamit ngayon, pero hinati na ang structure para madaling palawakin ang customer at tradesman dashboards.",
-    dashboardSourceLiveTitle: "Ipinapakita muna ang totoong dashboard numbers.",
+      "Makikita rito ang requests, bookings, notifications, at credit activity ng account.",
+    dashboardSourceLiveTitle: "Activity summary",
     dashboardSourceLiveDescription:
-      "Kinuwenta muna ang DB stats ng kasalukuyang account. Kapag may totoong data, iyon ang inuuna bago ang demo values.",
-    dashboardSourceDemoTitle: "Demo dashboard numbers ang ipinapakita ngayon.",
-    dashboardSourceDemoDescription:
-      "Kapag hindi pa mabasa ang totoong stats, sample values muna ang ipinapakita para makita ang daloy.",
+      "Kinuwenta muna ang naka-save na stats ng kasalukuyang account. Kapag wala pa, empty state ang ipapakita.",
     dashboardNotificationTitle: "Inbox ng abiso ng tradesman",
     dashboardNotificationDescription:
       "Dito pumapasok ang mga bagong booking at quote request. Dito rin maaaring markahan bilang nabasa ang isa o lahat.",
@@ -730,7 +693,6 @@ export const copy = {
     notificationsEmailHint: "Email",
     notificationsPushHint: "Push",
     notificationsSmsHint: "SMS",
-    sessionSwitcherLabel: "Demo account",
     sessionCustomerLabel: "Customer Maria",
     sessionTradesmanJoseLabel: "Tradesman Jose",
     sessionTradesmanMiguelLabel: "Tradesman Miguel",
@@ -742,19 +704,19 @@ export const copy = {
     dashboardCustomer2: "Mga paparating na booking at mabilis na chat shortcut",
     dashboardCustomer3: "Confirmed bookings at paalala para sa review",
     dashboardTradesmanTitle: "Makikita sa tradesman view",
-    dashboardTradesman1: "Mga bagong quote request at bid submission action",
+    dashboardTradesman1: "Mga bagong quote request at quote submission action",
     dashboardTradesman2: "Service listings at pending booking acceptance",
     dashboardTradesman3: "Credit balance and quote-fee history",
     adminEyebrow: "Admin",
     adminTitle: "Hindi lang tagamasid ng transactions ang admin, siya ang tagabantay ng tiwala sa platform.",
     adminDescription:
-      "Kung huli na idaragdag ang admin flow sa MVP, mahirap humawak ng incident. Kaya maaga pa lang ay kasama na ang approval, disputes, at suspensions.",
+      "Pinapadali ng approval, disputes, at suspension tools ang ligtas na pagpapatakbo ng platform.",
     adminOneOutTitle: "One-out policy",
     adminOneOut1: "Kapag napatunayang seryoso ang reklamo, ilalagay agad ang tradesman sa suspension review.",
     adminOneOut2: "Kasamang tinitingnan ng admin ang chat, work photos, reports, at reviews bago magpasya.",
-    adminOneOut3: "Hindi ginagawa ang suspension mula sa user input lamang; server authority at admin judgment lang ang basehan.",
+    adminOneOut3: "Dumadaan muna sa admin review at approval ang anumang suspension.",
     adminEditHint:
-      "Ang mga panel sa ibaba ang direktang hinahawakan ng admin. Para itong control room ng operations.",
+      "Gamitin ang mga panel sa ibaba para sa approvals, categories, credits, at reports.",
     adminCategoriesPanel: "Category management",
     adminCategoriesDescription:
       "Dito ina-add, inaayos ang order, at tina-toggle ang visibility ng categories.",
@@ -765,7 +727,7 @@ export const copy = {
     adminCategoryCancelEditAction: "Cancel edit",
     adminCategoryFormTitle: "New category form",
     adminCategoryFormDescription:
-      "Ang idaragdag dito ay lalabas agad sa listahan sa ibaba. Para itong paggawa ng bagong shelf sa admin preview.",
+      "Ang idaragdag dito ay lalabas agad sa listahan sa ibaba.",
     adminCategoryEditTitle: "Edit category",
     adminCategoryEditDescription:
       "Puwedeng baguhin agad dito ang pangalan, description, at order ng category. Para itong pagpapalit ng label sa mismong shelf.",
@@ -852,25 +814,19 @@ export const copy = {
     tradesmanCertificates: "Certificates",
     tradesmanPortfolio: "Portfolio",
     tradesmanReviews: "Reviews",
-    notFoundTitle: "Hindi nakita ang hinihinging tradesman page.",
+    notFoundTitle: "Hindi nakita ang hinihinging page.",
     notFoundDescription:
-      "Maaaring mali ang address o hindi pa handa ang profile. Bumalik sa home at subukang hanapin muli mula roon.",
+      "Maaaring mali ang address, o kailangan ng login permission ang screen na ito. Bumalik sa home at subukang hanapin muli mula roon.",
     notFoundButton: "Back to home",
   },
   en: {
     siteName: "AyosNow",
     siteTagline: "Home Services",
-    demoModeBannerTitle: "You are viewing demo mode.",
-    demoModeBannerDescription:
-      "This screen is using a demo account and sample data together. Some results may differ from real saved data.",
-    demoModePageTitle: "This is a demo mode screen.",
-    demoModePageDescription:
-      "Some lists and buttons on this screen may be previews or sample data. Please treat them separately from real operational data.",
     profile: "My Profile",
     startRequest: "Start Request",
     languageLabel: "Language",
     footerIntro:
-      "This is an MVP service marketplace structure for the Philippines. It combines instant booking and quote requests in one place.",
+      "A home service platform for finding, chatting with, and booking trusted tradesmen in the Philippines.",
     footerFlowTitle: "Core Flow",
     footerFlowText:
       "Service discovery → chat → confirmed booking → review in one connected journey.",
@@ -904,7 +860,7 @@ export const copy = {
     homeAdminValueLabel: "Value for admins",
     homeAdminValue: "Approval and dispute flow included",
     homeAdminHelper:
-      "Approval, one-out policy, and transaction monitoring are considered from the MVP stage.",
+      "Approval, reports, and account controls help keep the marketplace safer.",
     homeFeaturedTitle: "Recommended Instant-Book Services",
     homeFeaturedDescription:
       "These are easier for customers to book quickly because the price range is more predictable.",
@@ -920,14 +876,15 @@ export const copy = {
     homeStep2: "Choose a tradesman and chat in real time",
     homeStep3: "Confirm schedule with tradesman",
     homeStep4: "Finish the job and publish a review",
-    categoriesTitle: "The first category set starts small, but the structure is ready to grow easily.",
+    categoriesEyebrow: "Service categories",
+    categoriesTitle: "Find the work you need by category.",
     categoriesDescription:
-      "If categories are hard-coded as enums too early, adding more later becomes expensive. That is why the MVP already treats categories like data.",
+      "Browse common home services such as cleaning, repair, installation, and moving.",
     servicesEyebrow: "Instant Booking",
     servicesTitle:
       "Services with a clearer scope and price can move through the instant-booking flow.",
     servicesDescription:
-      "Like TaskRabbit, customers can browse a service first and book quickly. Each card shows price range, rating, arrival time, and tradesman information together.",
+      "Check the price range, area, rating, and tradesman before choosing a service.",
     servicesRatingLabel: "Rating",
     servicesReviewsSuffix: "reviews",
     servicesProfileLink: "Tradesman Profile",
@@ -963,7 +920,7 @@ export const copy = {
     quoteRequestSuccess: "Request submitted.",
     quoteRequestMatchedExperts: "Matched experts:",
     quoteRequestSeeDetails: "View details",
-    quoteRequestPreviewButton: "Preview Request",
+    quoteRequestPreviewButton: "Review Request",
     quoteRequestSubmitError:
       "Could not submit the request. Please check the form and try again.",
     quoteRequestFlowTitle: "How the system works",
@@ -998,12 +955,12 @@ export const copy = {
     quotesSelectSuccess: "The quote was turned into a booking and a work chat.",
     quotesSelectError: "Could not select this quote.",
     quotesChatAfterBookingHint:
-      "Choosing the quote now prepares both the real booking and its work chat room.",
-    chatEyebrow: "Realtime Chat",
+      "Choosing the quote prepares the booking and its work chat room.",
+    chatEyebrow: "Chat",
     chatTitle:
-      "Chat is tied to each job so the booking context does not get lost in the conversation.",
+      "Talk with the tradesman about the job.",
     chatDescription:
-      "This is not just a simple messenger. It is easier to handle disputes and schedule changes when the conversation is clearly attached to a booking.",
+      "Quote and booking conversations appear here, including schedule details and work updates.",
     chatListTitle: "Conversation list",
     chatNewMessage: "New messages",
     chatInputPlaceholder: "Type the next work update here.",
@@ -1029,13 +986,13 @@ export const copy = {
     chatBubble2: "Yes, I will send it now together with the filter section photo.",
     chatBubble3: "Thanks. If any parts are needed, I will let you know before I travel.",
     chatInfo1:
-      "The idea is to keep text, images, and job context together on one screen.",
+      "Messages and photos help both sides confirm the work clearly.",
     chatInfo2:
-      "The next step would be plugging in a realtime engine such as WebSocket or Supabase Realtime.",
+      "Use each work conversation to review details before and after the visit.",
     bookingsEyebrow: "Bookings",
-    bookingsTitle: "Booking is easier to operate when the status model stays simple.",
+    bookingsTitle: "Track the status of your bookings.",
     bookingsDescription:
-      "The base flow uses `pending → accepted → in-progress → completed`, with `cancelled` branching off when a booking is called off.",
+      "See whether a booking is waiting, accepted, in progress, completed, or cancelled.",
     bookingsCustomerLabel: "Customer",
     bookingsTradesmanLabel: "Tradesman",
     bookingsDetailButton: "View details",
@@ -1045,10 +1002,7 @@ export const copy = {
       "Use the `Detail and booking actions` button on a card below to open the screen with the chat button, next-step guide, reschedule, and complete actions.",
     bookingsSourceLiveTitle: "Real booking data is shown first.",
     bookingsSourceLiveDescription:
-      "The page checked the database for the current account first. Even in demo mode, real bookings are shown before sample cards when they exist.",
-    bookingsSourceDemoTitle: "You are currently looking at the demo booking list.",
-    bookingsSourceDemoDescription:
-      "If there are no real bookings yet or the DB is unavailable, sample booking cards are shown so you can still review the flow.",
+      "The page checks saved bookings for the current account first. If none exist, it shows an empty state.",
     bookingsEmptyTitle: "There are no real bookings yet.",
     bookingsEmptyDescription:
       "Real booking cards will appear here after an instant booking or a selected quote is turned into a booking.",
@@ -1100,17 +1054,10 @@ export const copy = {
     bookingActionsStatusNoteLabel: "Next step guide",
     bookingDetailCompletedAtLabel: "Completed at",
     bookingDetailAmountPending: "Finalized after the site check",
-    bookingDetailDemoNoticeTitle: "This is a demo booking detail view.",
-    bookingDetailDemoNoticeDescription:
-      "This booking uses sample data for screen checking. Real chat and booking actions work only on real DB-backed bookings.",
-    bookingDetailDemoActionDescription:
-      "This is demo data, but you can still press reschedule and complete to preview how the booking flow looks on screen.",
-    bookingDetailDemoChatHint:
-      "You can move to the demo chat screen to preview the work conversation layout.",
     profileEyebrow: "Profile",
     profileTitle: "Both customers and tradesmen should see their activity around a simple profile first.",
     profileDescription:
-      "At an early MVP stage, a clear activity summary is more practical than a complicated settings screen.",
+      "Review your account details, requests, and bookings in one place.",
     profileAccountType: "Customer account",
     profilePaymentMethod: "Main service area: Quezon City",
     profilePreferredCategories: "Preferred categories: Aircon Cleaning, Cleaning, Plumbing",
@@ -1119,15 +1066,12 @@ export const copy = {
     profileMyBookings: "My bookings",
     profileQuoteCount: "quotes",
     dashboardEyebrow: "Dashboard",
-    dashboardTitleSuffix: "'s MVP dashboard",
+    dashboardTitleSuffix: "'s dashboard",
     dashboardDescription:
-      "The app still uses temporary session data, but the structure is already separated so customer and tradesman dashboards can grow cleanly.",
-    dashboardSourceLiveTitle: "Real dashboard numbers are shown first.",
+      "Review your requests, bookings, notifications, and credit activity in one place.",
+    dashboardSourceLiveTitle: "Activity summary",
     dashboardSourceLiveDescription:
-      "The page calculated DB stats for the current account first. When real data exists, it is shown before any demo values.",
-    dashboardSourceDemoTitle: "Demo dashboard numbers are currently shown.",
-    dashboardSourceDemoDescription:
-      "When real stats cannot be loaded yet, sample values are shown so the flow can still be reviewed.",
+      "The page calculates saved stats for the current account first. If none exist, it shows an empty state.",
     dashboardNotificationTitle: "Tradesman notification inbox",
     dashboardNotificationDescription:
       "New bookings and quote requests arrive here. You can open the list, mark items as read, or clear all unread items.",
@@ -1145,7 +1089,6 @@ export const copy = {
     notificationsEmailHint: "Email",
     notificationsPushHint: "Push",
     notificationsSmsHint: "SMS",
-    sessionSwitcherLabel: "Demo account",
     sessionCustomerLabel: "Customer Maria",
     sessionTradesmanJoseLabel: "Tradesman Jose",
     sessionTradesmanMiguelLabel: "Tradesman Miguel",
@@ -1157,20 +1100,20 @@ export const copy = {
     dashboardCustomer2: "Upcoming bookings and fast chat shortcuts",
     dashboardCustomer3: "Confirmed bookings and review prompts",
     dashboardTradesmanTitle: "What tradesmen should see",
-    dashboardTradesman1: "New quote request alerts and bid submission actions",
+    dashboardTradesman1: "New quote request alerts and quote submission actions",
     dashboardTradesman2: "Service listings and pending booking acceptance",
     dashboardTradesman3: "Credit balance and quote-fee history",
     adminEyebrow: "Admin",
     adminTitle:
       "Admins should do more than watch transactions. They should protect trust in the platform.",
     adminDescription:
-      "If admin tools are added too late, incident handling becomes difficult. That is why approval, disputes, and suspension flow are part of the MVP structure from the start.",
+      "Approval, dispute, and suspension tools help admins keep the platform safe.",
     adminOneOutTitle: "One-out policy",
     adminOneOut1: "If a serious complaint is confirmed, the tradesman moves into suspension review right away.",
     adminOneOut2: "Admins review chat, work photos, reports, and reviews together before deciding.",
-    adminOneOut3: "Suspension never comes from raw user input alone. It must go through server authority and admin judgment.",
+    adminOneOut3: "Suspension only proceeds after admin review and approval.",
     adminEditHint:
-      "The panels below are the controls an admin can directly touch. Think of them as the switches inside the operations room.",
+      "Use the panels below to manage approvals, categories, credits, and reports.",
     adminCategoriesPanel: "Category Management",
     adminCategoriesDescription:
       "Add categories, change their display order, and control visibility from one place.",
@@ -1181,7 +1124,7 @@ export const copy = {
     adminCategoryCancelEditAction: "Cancel Edit",
     adminCategoryFormTitle: "New Category Form",
     adminCategoryFormDescription:
-      "Categories added here immediately appear in the preview list below. Think of it as creating a new shelf in the admin showroom.",
+      "Categories added here immediately appear in the list below.",
     adminCategoryEditTitle: "Edit Category",
     adminCategoryEditDescription:
       "You can directly update the category name, description, and display order here. It is like replacing the label on a shelf that is already on display.",
@@ -1269,9 +1212,9 @@ export const copy = {
     tradesmanCertificates: "Certificates",
     tradesmanPortfolio: "Portfolio",
     tradesmanReviews: "Reviews",
-    notFoundTitle: "We could not find the requested tradesman page.",
+    notFoundTitle: "We could not find the requested page.",
     notFoundDescription:
-      "The address may be wrong, or the profile may not be ready yet. Please go back to the home page and try browsing again from there.",
+      "The address may be wrong, or this screen may require login permission. Please go back to the home page and try browsing again from there.",
     notFoundButton: "Back to Home",
   },
 } satisfies Record<Locale, Record<string, string>>;

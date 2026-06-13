@@ -11,6 +11,7 @@ interface HeaderNotificationBellProps {
   locale: Locale;
   initialNotifications: NotificationListItem[];
   initialUnreadCount: number;
+  enabled: boolean;
 }
 
 function formatTime(value: string, locale: Locale) {
@@ -60,6 +61,7 @@ export function HeaderNotificationBell({
   locale,
   initialNotifications,
   initialUnreadCount,
+  enabled,
 }: HeaderNotificationBellProps) {
   const router = useRouter();
   const text = copy[locale];
@@ -85,6 +87,10 @@ export function HeaderNotificationBell({
   );
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     function unlockAudio() {
       if (audioReadyRef.current) {
         return;
@@ -122,9 +128,14 @@ export function HeaderNotificationBell({
       window.removeEventListener("pointerdown", unlockAudio);
       window.removeEventListener("keydown", unlockAudio);
     };
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      mountedRef.current = false;
+      return;
+    }
+
     mountedRef.current = true;
 
     async function refreshNotifications() {
@@ -186,10 +197,10 @@ export function HeaderNotificationBell({
       window.removeEventListener("focus", handleFocusRefresh);
       document.removeEventListener("visibilitychange", handleFocusRefresh);
     };
-  }, [router]);
+  }, [enabled, router]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!enabled || !isOpen) {
       return;
     }
 
@@ -213,9 +224,13 @@ export function HeaderNotificationBell({
         // 알림창을 열 때 갱신이 실패해도 기존 목록은 유지한다.
       }
     })();
-  }, [isOpen]);
+  }, [enabled, isOpen]);
 
   async function markAsReadRequest(notificationId: string) {
+    if (!enabled) {
+      return false;
+    }
+
     const response = await fetch("/api/notifications/read", {
       method: "PATCH",
       headers: {
@@ -248,6 +263,10 @@ export function HeaderNotificationBell({
   }
 
   async function handleReadAll() {
+    if (!enabled) {
+      return;
+    }
+
     startTransition(async () => {
       const response = await fetch("/api/notifications/read-all", {
         method: "PATCH",
@@ -268,6 +287,10 @@ export function HeaderNotificationBell({
   }
 
   async function openDetails(notification: NotificationListItem) {
+    if (!enabled) {
+      return;
+    }
+
     if (!notification.isRead) {
       await markAsReadRequest(notification.id);
     }

@@ -11,7 +11,7 @@ export default async function ChatPage({
 }) {
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  await getSessionUser();
+  const sessionUser = await getSessionUser();
   const params = await searchParams;
 
   return (
@@ -23,6 +23,7 @@ export default async function ChatPage({
       <ChatWorkspace
         locale={locale}
         initialConversationId={params.conversationId}
+        enabled={Boolean(sessionUser)}
         text={{
           chatListTitle: text.chatListTitle,
           chatNewMessage: text.chatNewMessage,
@@ -43,13 +44,13 @@ export default async function ChatPage({
           chatNoConversationSelected: text.chatNoConversationSelected,
           chatBookingStatusLabel: text.chatBookingStatusLabel,
           chatOpenBookingDetail: text.chatOpenBookingDetail,
-          chatSourceLiveTitle: locale === "ko" ? "실제 채팅 목록을 보여주고 있습니다." : locale === "fil" ? "Ipinapakita ang totoong chat list." : "Real chat conversations are shown.",
+          chatSourceLiveTitle: locale === "ko" ? "내 대화 목록" : locale === "fil" ? "Aking mga usapan" : "My conversations",
           chatSourceLiveDescription:
             locale === "ko"
-              ? "현재 계정으로 저장된 실제 대화만 읽습니다. 아직 대화가 없으면 빈 상태를 보여줍니다."
+              ? "견적 선택이나 예약이 연결되면 작업별 대화가 이곳에 표시됩니다."
               : locale === "fil"
-                ? "Totoong conversations lang ng kasalukuyang account ang binabasa. Kapag wala pa, empty state ang makikita."
-                : "Only saved conversations for the current account are loaded. If there are none yet, the page shows an empty state.",
+                ? "Kapag may quote o booking na nakakabit, lalabas dito ang usapan para sa bawat trabaho."
+                : "Conversations for selected quotes and bookings will appear here.",
         }}
       />
     </PageShell>

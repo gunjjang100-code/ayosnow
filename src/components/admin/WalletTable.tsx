@@ -84,11 +84,11 @@ export function WalletTable({ initialWallets }: { initialWallets: AdminWalletRow
           <div>
             <h2 className="text-2xl font-black text-slate-950">전문가 지갑 관리</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              전문가별 크레딧 잔액과 견적료 차감 내역을 확인하고 수동 조정합니다.
+              전문가별 크레딧 잔액과 거래 내역을 확인하고 필요한 조정을 처리합니다.
             </p>
           </div>
           <span className="rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-bold text-orange-700">
-            DB 저장
+            저장됨
           </span>
         </div>
         {errorMessage ? (

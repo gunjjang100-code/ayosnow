@@ -48,9 +48,7 @@ export function AdminManualCreditPanel({ items }: AdminManualCreditPanelProps) {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    const accepted = window.confirm(
-      `${fullName} 전문가에게 200 PHP를 수동 충전하시겠어요?\n이 기능은 운영 보조용입니다.`,
-    );
+    const accepted = window.confirm(`${fullName} 전문가에게 200 PHP 크레딧을 추가하시겠어요?`);
 
     if (!accepted) {
       return;
@@ -84,11 +82,11 @@ export function AdminManualCreditPanel({ items }: AdminManualCreditPanelProps) {
           ? Object.values(result.error.fieldErrors).flat().find(Boolean)
           : null;
 
-        setErrorMessage(firstFieldError ?? result?.error?.formErrors?.[0] ?? "수동 충전에 실패했습니다.");
+        setErrorMessage(firstFieldError ?? result?.error?.formErrors?.[0] ?? "크레딧 추가에 실패했습니다.");
         return;
       }
 
-      setSuccessMessage(`${fullName} 전문가에게 200 PHP를 수동 충전했습니다.`);
+      setSuccessMessage(`${fullName} 전문가에게 200 PHP 크레딧을 추가했습니다.`);
       router.refresh();
     });
   }
@@ -145,13 +143,12 @@ export function AdminManualCreditPanel({ items }: AdminManualCreditPanelProps) {
     <article className="panel-shell p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-950">전문가 지갑 운영 보조</h2>
+          <h2 className="text-xl font-bold text-slate-950">전문가 크레딧 관리</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            기본 원칙은 전문가 직접 충전입니다. 이 화면은 운영 이슈가 있을 때 관리자에게 필요한
-            최소한의 수동 충전·환불 기능만 제공합니다.
+            전문가의 크레딧 잔액과 충전 기록을 확인하고 필요한 조정을 처리합니다.
           </p>
         </div>
-        <span className="chip">운영 보조</span>
+        <span className="chip">관리자 관리</span>
       </div>
 
       <div className="mt-5 grid gap-4">
@@ -168,7 +165,7 @@ export function AdminManualCreditPanel({ items }: AdminManualCreditPanelProps) {
                 disabled={isPending}
                 className="rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-400"
               >
-                {isPending ? "처리 중..." : "+200 PHP 수동 충전"}
+                {isPending ? "처리 중..." : "+200 PHP 추가"}
               </button>
             </div>
 

@@ -1,9 +1,9 @@
 import { NotificationRelatedType } from "@prisma/client";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { TradesmanQuoteForm } from "@/components/quote-request/tradesman-quote-form";
 import { PageShell } from "@/components/shared/page-shell";
-import { getDemoSessionUser, isAdmin } from "@/lib/auth/session";
+import { getSessionUser, isAdmin } from "@/lib/auth/session";
 import { copy } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import { prisma } from "@/lib/prisma";
@@ -17,7 +17,7 @@ export default async function QuoteRequestDetailPage({
   const { id } = await params;
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getSessionUser();
   const quoteRequest = await prisma.quoteRequest.findUnique({
     where: { id },
     include: {
@@ -28,6 +28,10 @@ export default async function QuoteRequestDetailPage({
 
   if (!quoteRequest) {
     notFound();
+  }
+
+  if (!sessionUser) {
+    redirect(`/login?callbackUrl=/quote-requests/${quoteRequest.id}`);
   }
 
   const hasNotification =

@@ -40,11 +40,7 @@ interface BookingActionsProps {
   locale: "ko" | "fil" | "en";
   statusNote: string;
   text: BookingActionsText;
-  demoMode?: boolean;
   canManageProgress?: boolean;
-  onDemoStatusChange?: (status: BookingStatus) => void;
-  onDemoScheduleChange?: (scheduledAtIso: string) => void;
-  onDemoCompletedAtChange?: (completedAtIso: string | null) => void;
 }
 
 export function BookingActions({
@@ -54,11 +50,7 @@ export function BookingActions({
   locale,
   statusNote,
   text,
-  demoMode = false,
   canManageProgress = true,
-  onDemoStatusChange,
-  onDemoScheduleChange,
-  onDemoCompletedAtChange,
 }: BookingActionsProps) {
   const router = useRouter();
   const [scheduledAt, setScheduledAt] = useState(() =>
@@ -81,17 +73,6 @@ export function BookingActions({
   function handleStatusUpdate(nextStatus: "accepted" | "in-progress") {
     if (!canManageProgress) {
       setFeedback(text.progressPermissionNote);
-      return;
-    }
-
-    if (demoMode) {
-      onDemoStatusChange?.(nextStatus);
-      // 데모 화면에서는 완료 상태를 다시 벗어나면 완료 시각도 같이 비운다.
-      // 그래야 "예전에 완료됐던 흔적"이 남아서 화면이 헷갈리지 않는다.
-      onDemoCompletedAtChange?.(null);
-      setFeedback(
-        nextStatus === "accepted" ? text.acceptSuccess : text.startSuccess,
-      );
       return;
     }
 
@@ -138,13 +119,6 @@ export function BookingActions({
       return;
     }
 
-    if (demoMode) {
-      const nextSchedule = new Date(scheduledAt);
-      onDemoScheduleChange?.(nextSchedule.toISOString());
-      setFeedback(text.scheduleSuccess);
-      return;
-    }
-
     setFeedback(null);
 
     startRescheduling(async () => {
@@ -182,15 +156,6 @@ export function BookingActions({
 
     if (!canComplete) {
       setFeedback(text.completeLockedNote);
-      return;
-    }
-
-    if (demoMode) {
-      onDemoStatusChange?.("completed");
-      // 데모 예약도 완료 버튼을 눌렀을 때 "언제 끝났는지"가 보여야
-      // 방문 시간과 작업 종료 시점을 구분해서 이해할 수 있다.
-      onDemoCompletedAtChange?.(new Date().toISOString());
-      setFeedback(text.completeSuccess);
       return;
     }
 

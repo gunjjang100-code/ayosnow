@@ -1,8 +1,5 @@
 import type { AdminCategoryItem, Category, Locale } from "@/lib/types";
 
-const sharedAdminCategoryStorageKey = "admin-category-items";
-const adminCategoryStoreEvent = "admin-category-store-updated";
-
 const localizedSlugFallbackMap: Record<string, Record<Locale, string>> = {
   "home-interior": {
     ko: "홈 인테리어",
@@ -19,31 +16,6 @@ const localizedSlugFallbackMap: Record<string, Record<Locale, string>> = {
     fil: "Pag-ayos ng Pinto",
     en: "Door Repair",
   },
-};
-
-export const getAdminCategoryStorageKey = () => sharedAdminCategoryStorageKey;
-
-const getLegacyAdminCategoryStorageKeys = (locale: Locale) => {
-  const allLocales: Locale[] = ["ko", "fil", "en"];
-  const remainingLocales = allLocales.filter((item) => item !== locale);
-
-  return [
-    `admin-category-items-${locale}`,
-    ...remainingLocales.map((item) => `admin-category-items-${item}`),
-  ];
-};
-
-export const isAdminCategoryItem = (item: unknown): item is AdminCategoryItem => {
-  if (!item || typeof item !== "object") {
-    return false;
-  }
-
-  const value = item as Record<string, unknown>;
-  return (
-    typeof value.id === "string" &&
-    typeof value.slug === "string" &&
-    typeof value.sortOrder === "number"
-  );
 };
 
 const formatSlugToTitle = (slug: string) =>
@@ -174,85 +146,4 @@ export const mergeCategoriesWithAdminItems = (
     });
 
   return mergedCategories;
-};
-
-const collectAdminCategoryItems = (
-  locale: Locale,
-  storage: Pick<Storage, "getItem">,
-) => {
-  const storageCandidates = [
-    getAdminCategoryStorageKey(),
-    ...getLegacyAdminCategoryStorageKeys(locale),
-  ];
-
-  const mergedItems: AdminCategoryItem[] = [];
-
-  storageCandidates.forEach((storageKey) => {
-    const storedValue = storage.getItem(storageKey);
-    if (!storedValue) {
-      return;
-    }
-
-    try {
-      const parsedValue = JSON.parse(storedValue) as unknown[];
-      if (!Array.isArray(parsedValue)) {
-        return;
-      }
-
-      parsedValue.filter(isAdminCategoryItem).forEach((item) => {
-        const alreadyExists = mergedItems.some(
-          (savedItem) => savedItem.slug === item.slug,
-        );
-
-        if (!alreadyExists) {
-          mergedItems.push(normalizeAdminCategoryItem(item));
-        }
-      });
-    } catch {
-      return;
-    }
-  });
-
-  return mergedItems.sort((left, right) => left.sortOrder - right.sortOrder);
-};
-
-export const loadAdminCategoryItems = (
-  locale: Locale,
-  storage: Pick<Storage, "getItem">,
-) => collectAdminCategoryItems(locale, storage);
-
-export const getAdminCategoryItemsSnapshot = (
-  locale: Locale,
-  storage: Pick<Storage, "getItem">,
-) => JSON.stringify(collectAdminCategoryItems(locale, storage));
-
-export const saveAdminCategoryItems = (
-  items: AdminCategoryItem[],
-  storage: Pick<Storage, "setItem">,
-) => {
-  storage.setItem(getAdminCategoryStorageKey(), JSON.stringify(items));
-};
-
-export const emitAdminCategoryStoreUpdated = () => {
-  window.dispatchEvent(new Event(adminCategoryStoreEvent));
-};
-
-export const subscribeAdminCategoryStore = (
-  onStoreChange: () => void,
-) => {
-  const handleStorage = (event: Event) => {
-    if (event instanceof StorageEvent && event.key && !event.key.includes("admin-category-items")) {
-      return;
-    }
-
-    onStoreChange();
-  };
-
-  window.addEventListener("storage", handleStorage);
-  window.addEventListener(adminCategoryStoreEvent, onStoreChange);
-
-  return () => {
-    window.removeEventListener("storage", handleStorage);
-    window.removeEventListener(adminCategoryStoreEvent, onStoreChange);
-  };
 };

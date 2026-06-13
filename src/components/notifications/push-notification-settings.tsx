@@ -42,7 +42,7 @@ export function PushNotificationSettings({
         mobileAndroid:
           "On Android, open this site in Chrome, allow notifications, and if possible install it as an app for more stable alerts.",
         mobileNetwork:
-          "Mobile push needs an address your phone can actually open. localhost works only on this computer, so use a real deployed URL or tunnel address for phone testing.",
+          "Turn on alerts on each device where you want to receive updates.",
         unsupported: "This browser does not support web push notifications.",
         denied: "Push is blocked in this browser. Change browser notification settings first.",
         statusOn: "Push alerts are active on this device.",
@@ -52,7 +52,7 @@ export function PushNotificationSettings({
         successOn: "Push alerts were enabled on this device.",
         successOff: "Push alerts were turned off on this device.",
         error: "Push setup failed. Please try again.",
-        missingKey: "Push is not configured on the server yet.",
+        missingKey: "Push alerts are being prepared.",
       };
     }
 
@@ -67,7 +67,7 @@ export function PushNotificationSettings({
         mobileAndroid:
           "Sa Android, buksan ang site na ito sa Chrome, payagan ang notifications, at kung maaari ay i-install bilang app para mas stable ang alerts.",
         mobileNetwork:
-          "Kailangan ng mobile push ang address na mabubuksan ng phone mo. Ang localhost ay para lang sa computer na ito, kaya kailangan ng tunay na deployed URL o tunnel address para sa phone test.",
+          "I-on ang alerts sa bawat device kung saan mo gustong makatanggap ng updates.",
         unsupported: "Hindi suportado ng browser na ito ang web push notifications.",
         denied: "Naka-block ang push sa browser na ito. Ayusin muna ang browser notification settings.",
         statusOn: "Aktibo ang push alerts sa device na ito.",
@@ -77,7 +77,7 @@ export function PushNotificationSettings({
         successOn: "Na-enable ang push alerts sa device na ito.",
         successOff: "Na-off ang push alerts sa device na ito.",
         error: "Hindi naihanda ang push alerts. Pakisubukang muli.",
-        missingKey: "Hindi pa naka-configure ang push sa server.",
+        missingKey: "Inihahanda pa ang push alerts.",
       };
     }
 
@@ -90,7 +90,7 @@ export function PushNotificationSettings({
       mobileAndroid:
         "안드로이드는 Chrome에서 이 사이트를 연 뒤 알림을 허용하고, 가능하면 앱처럼 설치하면 더 안정적으로 받을 수 있습니다.",
       mobileNetwork:
-        "휴대폰 푸시는 휴대폰이 실제로 열 수 있는 주소가 필요합니다. localhost는 이 컴퓨터 전용이므로, 휴대폰 테스트에는 실제 배포 주소나 터널 주소가 필요합니다.",
+        "알림을 받고 싶은 기기마다 알림을 켜 주세요.",
       unsupported: "이 브라우저는 웹 푸시 알림을 지원하지 않습니다.",
       denied: "이 브라우저에서 푸시가 차단돼 있습니다. 브라우저 알림 설정을 먼저 확인해 주세요.",
       statusOn: "이 기기에서 푸시 알림을 받고 있습니다.",
@@ -100,7 +100,7 @@ export function PushNotificationSettings({
       successOn: "이 기기에서 푸시 알림이 켜졌습니다.",
       successOff: "이 기기에서 푸시 알림을 껐습니다.",
       error: "푸시 알림 설정에 실패했습니다. 다시 시도해 주세요.",
-      missingKey: "서버에 푸시 키가 아직 설정되지 않았습니다.",
+      missingKey: "푸시 알림은 준비 중입니다.",
     };
   }, [locale]);
 

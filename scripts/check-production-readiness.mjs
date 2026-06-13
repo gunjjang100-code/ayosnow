@@ -3,6 +3,7 @@ import "dotenv/config";
 const requiredEnvNames = [
   "DATABASE_URL",
   "APP_URL",
+  "NEXTAUTH_URL",
   "NEXTAUTH_SECRET",
   "PAYMONGO_SECRET_KEY",
   "PAYMONGO_PUBLIC_KEY",
@@ -12,8 +13,11 @@ const requiredEnvNames = [
   "WEB_PUSH_CONTACT_EMAIL",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
-  "FACEBOOK_CLIENT_ID",
-  "FACEBOOK_CLIENT_SECRET",
+  "RESEND_API_KEY",
+  "EMAIL_FROM",
+  "TWILIO_ACCOUNT_SID",
+  "TWILIO_AUTH_TOKEN",
+  "TWILIO_FROM_NUMBER",
 ];
 
 const errors = [];
@@ -35,12 +39,21 @@ for (const name of requiredEnvNames) {
 }
 
 const appUrl = getEnv("APP_URL");
+const nextAuthUrl = getEnv("NEXTAUTH_URL");
 if (appUrl && /localhost|127\.0\.0\.1/.test(appUrl)) {
   errors.push("APP_URL이 localhost입니다. 운영에서는 실제 https 도메인을 써야 합니다.");
 }
 
 if (appUrl && !appUrl.startsWith("https://")) {
   errors.push("APP_URL은 운영에서 https:// 로 시작해야 합니다.");
+}
+
+if (nextAuthUrl && /localhost|127\.0\.0\.1/.test(nextAuthUrl)) {
+  errors.push("NEXTAUTH_URL이 localhost입니다. 운영에서는 실제 https 도메인을 써야 합니다.");
+}
+
+if (nextAuthUrl && !nextAuthUrl.startsWith("https://")) {
+  errors.push("NEXTAUTH_URL은 운영에서 https:// 로 시작해야 합니다.");
 }
 
 if (getEnv("ENABLE_DEMO_AUTH") === "true") {

@@ -1,14 +1,10 @@
 "use client";
 
-import { useSyncExternalStore, useState } from "react";
+import { useState, useTransition } from "react";
 
 import {
-  emitAdminCategoryStoreUpdated,
-  getAdminCategoryItemsSnapshot,
   getLocalizedAdminCategoryDescription,
   getLocalizedAdminCategoryName,
-  subscribeAdminCategoryStore,
-  saveAdminCategoryItems,
 } from "@/lib/local-categories";
 import {
   adminCategoryCreateSchema,
@@ -113,21 +109,15 @@ export function AdminCategoryManager({
   locale,
   text,
 }: AdminCategoryManagerProps) {
-  const storedItemsSnapshot = useSyncExternalStore(
-    subscribeAdminCategoryStore,
-    () => getAdminCategoryItemsSnapshot(locale, window.localStorage),
-    () => "[]",
+  const [items, setItems] = useState(() =>
+    [...initialItems].sort((left, right) => left.sortOrder - right.sortOrder),
   );
-  const parsedStoredItems = JSON.parse(storedItemsSnapshot) as AdminCategoryItem[];
-  const items =
-    parsedStoredItems.length > 0
-      ? parsedStoredItems
-      : [...initialItems].sort((left, right) => left.sortOrder - right.sortOrder);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [formState, setFormState] = useState<CategoryFormState>(initialFormState);
   const [fieldErrors, setFieldErrors] = useState<CategoryFieldErrors>({});
   const [notice, setNotice] = useState("");
+  const [isSaving, startSaving] = useTransition();
 
   const resetFormState = () => {
     setFormState(initialFormState);
@@ -240,54 +230,51 @@ export function AdminCategoryManager({
       return;
     }
 
-    const nextItems = editingItemId
-      ? items
-          .map((item) =>
-            item.id === editingItemId
-              ? {
-                  ...item,
-                  slug: payload.slug,
-                  nameKo: payload.nameKo,
-                  nameFil: payload.nameFil,
-                  nameEn: payload.nameEn,
-                  descriptionKo: payload.descriptionKo,
-                  descriptionFil: payload.descriptionFil,
-                  descriptionEn: payload.descriptionEn,
-                  statusLabel: getLocalizedStatusLabel(payload.isActive),
-                  sortOrder: Number(payload.displayOrder),
-                  featured: payload.featured,
-                  isActive: payload.isActive,
-                }
-              : item,
-          )
-          .sort((left, right) => left.sortOrder - right.sortOrder)
-      : [...items, {
-          id: `local-category-${Date.now()}`,
-          slug: payload.slug,
-          nameKo: payload.nameKo,
-          nameFil: payload.nameFil,
-          nameEn: payload.nameEn,
-          descriptionKo: payload.descriptionKo,
-          descriptionFil: payload.descriptionFil,
-          descriptionEn: payload.descriptionEn,
-          serviceCount: 0,
-          statusLabel: getLocalizedStatusLabel(payload.isActive),
-          sortOrder: Number(payload.displayOrder),
-          featured: payload.featured,
-          isActive: payload.isActive,
-        }].sort((left, right) => left.sortOrder - right.sortOrder);
+    startSaving(async () => {
+      const response = await fetch(
+        editingItemId
+          ? `/api/admin/categories/${editingItemId}?locale=${locale}`
+          : `/api/admin/categories?locale=${locale}`,
+        {
+          method: editingItemId ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        },
+      );
 
-    saveAdminCategoryItems(nextItems, window.localStorage);
-    emitAdminCategoryStoreUpdated();
-    resetFormState();
-    setEditingItemId(null);
-    setFieldErrors({});
-    setNotice(
-      editingItemId
-        ? text.adminCategoryUpdatedMessage
-        : text.adminCategoryAddedMessage,
-    );
-    setIsFormOpen(false);
+      const result = (await response.json().catch(() => null)) as
+        | { category?: AdminCategoryItem; error?: string }
+        | null;
+
+      if (!response.ok || !result?.category) {
+        setNotice(result?.error ?? "카테고리를 저장하지 못했습니다.");
+        return;
+      }
+
+      // 서버 DB가 진짜 저장소입니다. 화면 목록은 서버가 돌려준 값으로만 갱신합니다.
+      const savedCategory = result.category;
+      setItems((currentItems) => {
+        const nextItems = editingItemId
+          ? currentItems.map((item) =>
+              item.id === editingItemId ? savedCategory : item,
+            )
+          : [...currentItems, savedCategory];
+
+        return nextItems.sort((left, right) => left.sortOrder - right.sortOrder);
+      });
+
+      resetFormState();
+      setEditingItemId(null);
+      setFieldErrors({});
+      setNotice(
+        editingItemId
+          ? text.adminCategoryUpdatedMessage
+          : text.adminCategoryAddedMessage,
+      );
+      setIsFormOpen(false);
+    });
   };
 
   const handleStartEdit = (item: AdminCategoryItem) => {
@@ -322,18 +309,30 @@ export function AdminCategoryManager({
       return;
     }
 
-    const nextItems = items.filter((item) => item.id !== itemId);
-    saveAdminCategoryItems(nextItems, window.localStorage);
-    emitAdminCategoryStoreUpdated();
+    startSaving(async () => {
+      const response = await fetch(`/api/admin/categories/${itemId}`, {
+        method: "DELETE",
+      });
+      const result = (await response.json().catch(() => null)) as
+        | { error?: string }
+        | null;
 
-    if (editingItemId === itemId) {
-      setEditingItemId(null);
-      resetFormState();
-      setIsFormOpen(false);
-    }
+      if (!response.ok) {
+        setNotice(result?.error ?? "카테고리를 삭제하지 못했습니다.");
+        return;
+      }
 
-    setFieldErrors({});
-    setNotice(text.adminCategoryDeletedMessage);
+      setItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
+
+      if (editingItemId === itemId) {
+        setEditingItemId(null);
+        resetFormState();
+        setIsFormOpen(false);
+      }
+
+      setFieldErrors({});
+      setNotice(text.adminCategoryDeletedMessage);
+    });
   };
 
   const handleCloseForm = () => {
@@ -552,11 +551,14 @@ export function AdminCategoryManager({
             {notice ? <p className="text-sm font-semibold text-teal-700">{notice}</p> : <span />}
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white"
+              disabled={isSaving}
+              className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-400"
             >
-              {editingItemId
-                ? text.adminCategoryUpdateAction
-                : text.adminCategorySaveAction}
+              {isSaving
+                ? "저장 중..."
+                : editingItemId
+                  ? text.adminCategoryUpdateAction
+                  : text.adminCategorySaveAction}
             </button>
           </div>
         </form>
@@ -594,6 +596,7 @@ export function AdminCategoryManager({
               <button
                 type="button"
                 onClick={() => handleStartEdit(item)}
+                disabled={isSaving}
                 className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 {text.adminCategoryEditAction}
@@ -601,7 +604,8 @@ export function AdminCategoryManager({
               <button
                 type="button"
                 onClick={() => handleDelete(item.id)}
-                className="rounded-full bg-rose-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-rose-700"
+                disabled={isSaving}
+                className="rounded-full bg-rose-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-300"
               >
                 {text.adminCategoryDeleteAction}
               </button>

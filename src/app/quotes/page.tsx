@@ -3,7 +3,7 @@ import Link from "next/link";
 import { RoleAccessNotice } from "@/components/shared/role-access-notice";
 import { SelectQuoteButton } from "@/components/chat/select-quote-button";
 import { PageShell } from "@/components/shared/page-shell";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { copy } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
 import { listQuoteWorkspaceForCustomer } from "@/lib/quotes/service";
@@ -34,9 +34,9 @@ function formatQuoteDateLabel(
   fallbackYearSource?: string,
 ) {
   // 날짜 문자열은 두 종류가 섞여 있다.
-  // 1) 실제 DB/목업의 ISO 형식: 2026-04-15
+  // 1) ISO 날짜 형식: 2026-04-15
   // 2) 이미 사람이 읽기 좋은 문장형 형식: "4월 15일 오전 9시"
-  // 영어/필리핀어 목업의 "Apr 15, 9:00 AM" 같은 값은 연도가 빠져 있어서
+  // 영어/필리핀어의 "Apr 15, 9:00 AM" 같은 값은 연도가 빠져 있어서
   // JS가 2001년으로 잘못 해석할 수 있다.
   // 그래서 연도가 없는 경우에는 요청 날짜의 연도를 붙여서 다시 읽는다.
   const fallbackYear = fallbackYearSource
@@ -61,7 +61,7 @@ function formatQuoteDateLabel(
 export default async function QuotesPage() {
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const canUseCustomerQuotes = canAccessCustomerMarketplace(sessionUser.role);
 
   const quoteWorkspaces =

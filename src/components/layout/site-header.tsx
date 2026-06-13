@@ -27,7 +27,7 @@ export function SiteHeader({
 }: SiteHeaderProps) {
   const text = copy[locale];
   const navigationConfig = getRoleNavigationConfig(locale, role);
-  const isSignedIn = currentSessionToken === "next-auth" || currentSessionToken.startsWith("demo-");
+  const isSignedIn = currentSessionToken === "next-auth";
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/70 bg-white/82 backdrop-blur-xl">
@@ -59,6 +59,7 @@ export function SiteHeader({
             locale={locale}
             initialNotifications={initialNotifications}
             initialUnreadCount={initialUnreadCount}
+            enabled={isSignedIn}
           />
           {role === "tradesman" ? (
             <Link

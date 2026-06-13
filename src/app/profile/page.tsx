@@ -1,7 +1,7 @@
 import { PageShell } from "@/components/shared/page-shell";
 import { PushNotificationSettings } from "@/components/notifications/push-notification-settings";
 import { TradesmanSkillManager } from "@/components/profile/tradesman-skill-manager";
-import { getDemoSessionUser } from "@/lib/auth/session";
+import { getOptionalSessionUser } from "@/lib/auth/session";
 import { listBookingPreviewsForUser } from "@/lib/bookings/list-bookings-service";
 import { copy } from "@/lib/i18n";
 import { getCurrentLocale } from "@/lib/i18n-server";
@@ -12,7 +12,7 @@ import { listTradesmanSkillSettings } from "@/lib/tradesmen/tradesman-skill-sett
 export default async function ProfilePage() {
   const locale = await getCurrentLocale();
   const text = copy[locale];
-  const sessionUser = await getDemoSessionUser();
+  const sessionUser = await getOptionalSessionUser();
   const quoteRequests = sessionUser.role === "customer"
     ? await listQuoteWorkspaceForCustomer(sessionUser.id).catch(() => [])
     : [];
@@ -126,17 +126,17 @@ export default async function ProfilePage() {
                 </div>
                 <div className="rounded-2xl bg-slate-50 p-4">
                   {locale === "en"
-                    ? "Admin actions should always be recorded and reviewed."
+                    ? "Review recent admin activity and account information."
                     : locale === "fil"
-                      ? "Dapat laging may record at review ang admin actions."
-                      : "관리자 작업은 항상 기록과 검토를 남기는 것이 좋습니다."}
+                      ? "Suriin ang recent admin activity at account information."
+                      : "관리자 활동과 계정 정보를 확인합니다."}
                 </div>
                 <div className="rounded-2xl bg-slate-50 p-4">
                   {locale === "en"
-                    ? "Customer booking CTA is intentionally removed from the admin profile."
+                    ? "Admin accounts focus on operations management."
                     : locale === "fil"
-                      ? "Sadyang inalis ang customer booking CTA sa admin profile."
-                      : "관리자 프로필에서는 고객용 예약 CTA를 의도적으로 제거했습니다."}
+                      ? "Nakatuon ang admin accounts sa operations management."
+                      : "관리자 계정은 운영 관리 화면을 중심으로 사용합니다."}
                 </div>
               </>
             ) : null}

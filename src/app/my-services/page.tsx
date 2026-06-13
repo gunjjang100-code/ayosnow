@@ -31,7 +31,7 @@ export default async function MyServicesPage() {
       }
       description={
         locale === "ko"
-          ? "보여 줄 서비스, 가격 느낌, 이동 가능 지역을 이 화면에서 정리하는 구조입니다."
+          ? "고객에게 보여 줄 서비스, 가격대, 방문 가능 지역을 이 화면에서 관리합니다."
           : locale === "fil"
             ? "Dito inaayos ang visible services, pricing feel, at travel coverage."
             : "This is where visible services, pricing posture, and travel coverage are organized."

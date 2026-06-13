@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 import { isSameOriginMutationRequest } from "@/lib/auth/csrf";
 
@@ -7,8 +8,28 @@ const csrfExemptApiPrefixes = [
   "/api/paymongo/webhook",
 ];
 
-export function proxy(request: NextRequest) {
+const roleSelectionAllowedApiPrefixes = [
+  "/api/auth",
+  "/api/account/role",
+];
+
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  if (
+    token?.needsRoleSelection &&
+    !roleSelectionAllowedApiPrefixes.some((prefix) => pathname.startsWith(prefix))
+  ) {
+    return NextResponse.json(
+      { error: "가입 역할을 먼저 선택해 주세요." },
+      { status: 403 },
+    );
+  }
 
   if (csrfExemptApiPrefixes.some((prefix) => pathname.startsWith(prefix))) {
     return NextResponse.next();

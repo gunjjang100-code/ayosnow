@@ -50,18 +50,6 @@ export function getRoleHomePath(role: UserRole) {
   return "/";
 }
 
-export function getRoleHomePathForSessionToken(token: string) {
-  if (token === "demo-admin") {
-    return "/admin";
-  }
-
-  if (token.startsWith("demo-tradesman")) {
-    return "/dashboard";
-  }
-
-  return "/";
-}
-
 export function canAccessCustomerMarketplace(role: UserRole) {
   return role === "customer";
 }
