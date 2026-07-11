@@ -1,0 +1,57 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "puntago",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-06-27",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "routes": [
+    {
+      "pattern": "puntago.net",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.puntago.net",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "APP_URL": "https://puntago.net",
+    "NEXTAUTH_URL": "https://puntago.net",
+    "WEB_PUSH_CONTACT_EMAIL": "mailto:hello@puntago.net",
+    "EMAIL_FROM": "PuntaGo <hello@puntago.net>",
+    "CONTACT_SUPPORT_EMAIL": "support@puntago.net",
+    "CONTACT_PRIVACY_EMAIL": "privacy@puntago.net",
+    "CONTACT_BUSINESS_EMAIL": "business@puntago.net",
+    "CONTACT_ABUSE_EMAIL": "abuse@puntago.net"
+  },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "puntago"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "puntago-opennext-cache"
+    },
+    {
+      "binding": "PUNTAGO_UPLOADS_R2_BUCKET",
+      "bucket_name": "puntago-uploads"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "PUNTAGO_DB",
+      "database_name": "puntago-db",
+      "database_id": "a406c246-6375-4dff-86ae-5b5855c1951e"
+    }
+  ],
+  "images": {
+    "binding": "IMAGES"
+  }
+}

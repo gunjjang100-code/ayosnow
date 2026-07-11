@@ -3,11 +3,16 @@ node_modules/
 
 # Next.js build output
 .next/
+.open-next/
+.wrangler/
 out/
 
 # local environment files
 .env
 .env*.local
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 
 # logs
 npm-debug.log*
@@ -17,10 +22,6 @@ pnpm-debug.log*
 
 # TypeScript cache
 *.tsbuildinfo
-
-# local SQLite database
-dev.db
-dev.db-*
 
 # macOS
 .DS_Store

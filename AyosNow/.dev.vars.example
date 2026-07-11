@@ -1,0 +1,26 @@
+# Cloudflare local preview uses .dev.vars.
+# Copy this file to .dev.vars only on your own machine and fill real values there.
+# The production database uses the PUNTAGO_DB D1 binding in wrangler.jsonc.
+# DATABASE_URL is not needed for Cloudflare D1.
+
+APP_URL="https://puntago.net"
+NEXTAUTH_URL="https://puntago.net"
+NEXTAUTH_SECRET="replace-with-random-secret"
+
+PAYMONGO_SECRET_KEY="replace-with-paymongo-secret-key"
+PAYMONGO_PUBLIC_KEY="replace-with-paymongo-public-key"
+PAYMONGO_WEBHOOK_SECRET="replace-with-paymongo-webhook-secret"
+
+NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY="replace-with-web-push-public-key"
+WEB_PUSH_PRIVATE_KEY="replace-with-web-push-private-key"
+WEB_PUSH_CONTACT_EMAIL="mailto:hello@puntago.net"
+
+GOOGLE_CLIENT_ID="replace-with-google-client-id"
+GOOGLE_CLIENT_SECRET="replace-with-google-client-secret"
+
+RESEND_API_KEY="replace-with-resend-api-key"
+EMAIL_FROM="PuntaGo <hello@puntago.net>"
+
+TWILIO_ACCOUNT_SID="replace-with-twilio-account-sid"
+TWILIO_AUTH_TOKEN="replace-with-twilio-auth-token"
+TWILIO_FROM_NUMBER="replace-with-twilio-phone-number"

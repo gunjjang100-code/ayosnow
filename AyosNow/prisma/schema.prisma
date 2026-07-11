@@ -1,0 +1,879 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  CUSTOMER
+  TRADESMAN
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_APPROVAL
+}
+
+enum QuoteRequestStatus {
+  OPEN
+  MATCHED
+  CLOSED
+  CANCELLED
+}
+
+enum QuoteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  BOOKING_CREATED
+  QUOTE_REQUEST
+}
+
+enum NotificationRelatedType {
+  BOOKING
+  QUOTE_REQUEST
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+  SMS
+}
+
+enum MessageSenderRole {
+  CUSTOMER
+  TRADESMAN
+  SYSTEM
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
+enum UploadFolder {
+  CHAT
+  PROFILE
+  PORTFOLIO
+  SERVICES
+  REVIEWS
+  REPORTS
+  DOCUMENTS
+}
+
+enum UploadAccess {
+  PUBLIC
+  PRIVATE
+}
+
+enum CreditTransactionType {
+  CHARGE
+  REFUND
+  TOPUP
+}
+
+enum WalletTopupProvider {
+  PAYMONGO
+  MANUAL_ADMIN
+}
+
+enum WalletTopupStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum PlatformFeeType {
+  PERCENTAGE
+  FIXED
+}
+
+enum PlatformFeeScope {
+  PLATFORM
+  CATEGORY
+  SERVICE
+}
+
+enum AdminPublicationStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum TradesmanApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NEEDS_CHANGES
+}
+
+enum OneOutCaseStatus {
+  OPEN
+  UNDER_REVIEW
+  STRIKE_APPLIED
+  SUSPENDED
+  RESOLVED
+  DISMISSED
+}
+
+enum ReferralRewardStatus {
+  GRANTED
+  CANCELLED
+}
+
+enum AccountDeletionRequestStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum ProfessionalBadgeCode {
+  VERIFIED_PROFESSIONAL
+  TOP_PROFESSIONAL
+}
+
+enum ProfessionalBadgeSource {
+  AUTO
+  MANUAL
+}
+
+enum ProfessionalBadgeHistoryAction {
+  AWARDED
+  REMOVED
+  SETTINGS_UPDATED
+}
+
+model User {
+  id                       String                     @id @default(cuid())
+  email                    String                     @unique
+  passwordHash             String
+  fullName                 String
+  phoneNumber              String?
+  role                     UserRole                   @default(CUSTOMER)
+  roleSelectedAt           DateTime?
+  status                   AccountStatus              @default(ACTIVE)
+  city                     String?
+  barangay                 String?
+  avatarUrl                String?
+  lastSeenAt               DateTime?
+  referralCode             String?                    @unique
+  referredById             String?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  referredBy               User?                      @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals                User[]                     @relation("UserReferrals")
+  tradesmanProfile         TradesmanProfile?
+  services                 Service[]
+  quoteRequests            QuoteRequest[]             @relation("CustomerQuoteRequests")
+  submittedQuotes          Quote[]                    @relation("TradesmanQuotes")
+  customerBookings         Booking[]                  @relation("CustomerBookings")
+  tradesmanBookings        Booking[]                  @relation("TradesmanBookings")
+  customerConversations    Conversation[]             @relation("ConversationCustomer")
+  tradesmanConversations   Conversation[]             @relation("ConversationTradesman")
+  sentMessages             Message[]                  @relation("ConversationSender")
+  writtenReviews           Review[]                   @relation("ReviewAuthor")
+  receivedReviews          Review[]                   @relation("ReviewTarget")
+  raisedDisputes           Dispute[]                  @relation("RaisedDisputes")
+  handledDisputes          Dispute[]                  @relation("HandledDisputes")
+  commissionRulesCreated   PlatformCommissionRule[]   @relation("CommissionCreatedBy")
+  bannersCreated           AdminBanner[]              @relation("BannerCreatedBy")
+  updatedBanners           AdminBanner[]              @relation("BannerUpdatedBy")
+  noticesCreated           AdminNotice[]              @relation("NoticeCreatedBy")
+  updatedNotices           AdminNotice[]              @relation("NoticeUpdatedBy")
+  referralSettingsUpdated  ReferralSetting[]          @relation("ReferralSettingUpdatedBy")
+  promotionalVideosUpdated PromotionalVideoSetting[]  @relation("PromotionalVideoSettingUpdatedBy")
+  referralRewardsEarned    ReferralReward[]           @relation("ReferralRewardReferrer")
+  referralRewardsReceived  ReferralReward[]           @relation("ReferralRewardReferred")
+  approvalReviews          TradesmanApprovalRequest[] @relation("ApprovalReviewedBy")
+  accountDeletionRequests  AccountDeletionRequest[]   @relation("AccountDeletionRequestedBy")
+  accountDeletionReviews   AccountDeletionRequest[]   @relation("AccountDeletionReviewedBy")
+  oneOutCasesHandled       OneOutCase[]               @relation("OneOutHandledBy")
+  categoryUpdates          ServiceCategory[]          @relation("CategoryUpdatedBy")
+  notifications            Notification[]
+  pushSubscriptions        PushSubscription[]
+  typingIndicators         TypingIndicator[]
+  uploadedFiles            UploadedFile[]             @relation("UploadedFiles")
+  consentRecords           UserConsent[]
+  tradesmanAvailabilities  TradesmanAvailability[]
+  wallet                   Wallet?
+  creditTransactions       CreditTransaction[]
+  walletTopupPayments      WalletTopupPayment[]
+
+  @@index([role, status])
+  @@index([referredById])
+}
+
+model AccountDeletionRequest {
+  id              String                       @id @default(cuid())
+  userId          String
+  reviewerAdminId String?
+  status          AccountDeletionRequestStatus @default(PENDING)
+  reason          String?
+  ipAddress       String?
+  userAgent       String?
+  requestedAt     DateTime                     @default(now())
+  reviewedAt      DateTime?
+  reviewNote      String?
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+  user            User                         @relation("AccountDeletionRequestedBy", fields: [userId], references: [id], onDelete: Cascade)
+  reviewerAdmin   User?                        @relation("AccountDeletionReviewedBy", fields: [reviewerAdminId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status, requestedAt])
+  @@index([status, requestedAt])
+}
+
+model UserConsent {
+  id                           String    @id @default(cuid())
+  userId                       String
+  policyVersion                String
+  acceptedTerms                Boolean
+  acceptedPrivacy              Boolean
+  acceptedPaymentPolicy        Boolean
+  acceptedPaymentPolicyVersion String?
+  acceptedPaymentPolicyAt      DateTime?
+  acceptedProfessionalPolicy   Boolean   @default(false)
+  acceptedMarketing            Boolean   @default(false)
+  acceptedAt                   DateTime  @default(now())
+  ipAddress                    String?
+  userAgent                    String?
+  user                         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, policyVersion])
+  @@index([userId, acceptedAt])
+  @@index([policyVersion, acceptedAt])
+}
+
+model ReferralSetting {
+  id            String   @id @default(cuid())
+  rewardCredits Int      @default(100)
+  isActive      Boolean  @default(true)
+  updatedById   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  updatedBy     User?    @relation("ReferralSettingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model PromotionalVideoSetting {
+  id          String   @id @default(cuid())
+  video1Url   String?
+  video2Url   String?
+  video3Url   String?
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  updatedBy   User?    @relation("PromotionalVideoSettingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
+}
+
+model ReferralReward {
+  id             String               @id @default(cuid())
+  referrerId     String
+  referredUserId String
+  rewardCredits  Int
+  status         ReferralRewardStatus @default(GRANTED)
+  createdAt      DateTime             @default(now())
+  referrer       User                 @relation("ReferralRewardReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredUser   User                 @relation("ReferralRewardReferred", fields: [referredUserId], references: [id], onDelete: Cascade)
+
+  @@unique([referrerId, referredUserId])
+  @@index([referrerId, status])
+  @@index([referredUserId])
+}
+
+model TradesmanProfile {
+  id                   String                     @id @default(cuid())
+  userId               String                     @unique
+  headline             String
+  bio                  String
+  experienceYears      Int
+  serviceRadiusKm      Int                        @default(10)
+  averageRating        Float                      @default(0)
+  completedJobs        Int                        @default(0)
+  responseRate         Int                        @default(0)
+  isVerified           Boolean                    @default(false)
+  identityVerifiedAt   DateTime?
+  identityVerifiedById String?
+  oneOutStrikeCount    Int                        @default(0)
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  user                 User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certifications       Certification[]
+  portfolioItems       PortfolioItem[]
+  skillLinks           TradesmanSkill[]
+  approvalRequests     TradesmanApprovalRequest[]
+  oneOutCases          OneOutCase[]
+  badges               ProfessionalBadge[]
+  badgeHistory         ProfessionalBadgeHistory[]
+
+  @@index([isVerified, averageRating])
+}
+
+model ProfessionalBadgeSetting {
+  id                      String   @id @default("global")
+  badgesEnabled           Boolean  @default(true)
+  verifiedBadgeEnabled    Boolean  @default(true)
+  topBadgeEnabled         Boolean  @default(true)
+  topMinCompletedBookings Int      @default(10)
+  topMinAverageRating     Float    @default(4.7)
+  topMinResponseRate      Int      @default(90)
+  topMaxCancellationRate  Int      @default(5)
+  updatedById             String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+model ProfessionalBadge {
+  id                String                  @id @default(cuid())
+  profileId         String
+  code              ProfessionalBadgeCode
+  source            ProfessionalBadgeSource @default(AUTO)
+  isActive          Boolean                 @default(true)
+  isManuallyRemoved Boolean                 @default(false)
+  awardedAt         DateTime                @default(now())
+  removedAt         DateTime?
+  removedById       String?
+  removedReason     String?
+  lastCalculatedAt  DateTime                @default(now())
+  profile           TradesmanProfile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, code])
+  @@index([profileId, isActive])
+  @@index([code, isActive])
+}
+
+model ProfessionalBadgeHistory {
+  id           String                         @id @default(cuid())
+  profileId    String
+  badgeId      String?
+  code         ProfessionalBadgeCode
+  action       ProfessionalBadgeHistoryAction
+  actorAdminId String?
+  reason       String?
+  snapshotText String?
+  createdAt    DateTime                       @default(now())
+  profile      TradesmanProfile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, createdAt])
+  @@index([code, action, createdAt])
+}
+
+model Certification {
+  id         String           @id @default(cuid())
+  profileId  String
+  title      String
+  issuer     String?
+  acquiredAt DateTime?
+  expiresAt  DateTime?
+  fileUrl    String?
+  profile    TradesmanProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model PortfolioItem {
+  id          String           @id @default(cuid())
+  profileId   String
+  title       String
+  description String
+  imageUrl    String?
+  createdAt   DateTime         @default(now())
+  profile     TradesmanProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model TradesmanAvailability {
+  id          String   @id @default(cuid())
+  userId      String
+  dayOfWeek   Int
+  isAvailable Boolean  @default(true)
+  startTime   String   @default("09:00")
+  endTime     String   @default("18:00")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayOfWeek])
+  @@index([userId, dayOfWeek])
+}
+
+model ServiceCategory {
+  id              String                   @id @default(cuid())
+  slug            String                   @unique
+  name            String
+  description     String
+  nameKo          String?
+  nameFil         String?
+  nameEn          String?
+  descriptionKo   String?
+  descriptionFil  String?
+  descriptionEn   String?
+  iconName        String?
+  isActive        Boolean                  @default(true)
+  featured        Boolean                  @default(false)
+  displayOrder    Int                      @default(0)
+  updatedById     String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  services        Service[]
+  skillLinks      TradesmanSkill[]
+  quoteRequests   QuoteRequest[]
+  commissionRules PlatformCommissionRule[]
+  updatedBy       User?                    @relation("CategoryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([isActive, name])
+}
+
+model TradesmanSkill {
+  id         String           @id @default(cuid())
+  profileId  String
+  categoryId String
+  years      Int              @default(1)
+  isPrimary  Boolean          @default(false)
+  profile    TradesmanProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  category   ServiceCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, categoryId])
+}
+
+model Service {
+  id                      String                   @id @default(cuid())
+  ownerId                 String
+  categoryId              String
+  slug                    String                   @unique
+  title                   String
+  shortDescription        String
+  basePriceMin            Int
+  basePriceMax            Int
+  serviceArea             String?
+  tags                    String                   @default("")
+  durationMinutes         Int
+  isPublished             Boolean                  @default(false)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  owner                   User                     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  category                ServiceCategory          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  bookings                Booking[]
+  platformCommissionRules PlatformCommissionRule[]
+
+  @@index([categoryId, isPublished])
+  @@index([ownerId, isPublished])
+}
+
+model QuoteRequest {
+  id                 String              @id @default(cuid())
+  customerId         String
+  categoryId         String
+  title              String
+  description        String
+  city               String
+  addressLine        String
+  budgetMin          Int?
+  budgetMax          Int?
+  targetDate         DateTime?
+  status             QuoteRequestStatus  @default(OPEN)
+  selectedQuoteId    String?             @unique
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  customer           User                @relation("CustomerQuoteRequests", fields: [customerId], references: [id], onDelete: Cascade)
+  category           ServiceCategory     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  quotes             Quote[]
+  booking            Booking?
+  conversations      Conversation[]
+  creditTransactions CreditTransaction[]
+
+  @@index([customerId, status])
+  @@index([categoryId, status, targetDate])
+}
+
+model Quote {
+  id             String        @id @default(cuid())
+  quoteRequestId String
+  tradesmanId    String
+  amount         Int
+  visitDate      DateTime?
+  message        String
+  status         QuoteStatus   @default(PENDING)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  quoteRequest   QuoteRequest  @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade)
+  tradesman      User          @relation("TradesmanQuotes", fields: [tradesmanId], references: [id], onDelete: Cascade)
+  booking        Booking?
+  conversation   Conversation?
+
+  @@unique([quoteRequestId, tradesmanId])
+  @@index([tradesmanId, status])
+}
+
+model Booking {
+  id             String        @id @default(cuid())
+  customerId     String
+  tradesmanId    String
+  serviceId      String?
+  quoteRequestId String?       @unique
+  quoteId        String?       @unique
+  scheduledAt    DateTime
+  status         BookingStatus @default(PENDING)
+  finalAmount    Int
+  workAddress    String
+  completionNote String?
+  completedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  customer       User          @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
+  tradesman      User          @relation("TradesmanBookings", fields: [tradesmanId], references: [id], onDelete: Cascade)
+  service        Service?      @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  quoteRequest   QuoteRequest? @relation(fields: [quoteRequestId], references: [id], onDelete: SetNull)
+  quote          Quote?        @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  conversation   Conversation?
+  reviews        Review[]
+  disputes       Dispute[]
+  oneOutCases    OneOutCase[]
+
+  @@index([customerId, status, scheduledAt])
+  @@index([tradesmanId, status, scheduledAt])
+}
+
+model Notification {
+  id          String                   @id @default(cuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String
+  relatedId   String?
+  relatedType NotificationRelatedType?
+  channel     NotificationChannel      @default(IN_APP)
+  isRead      Boolean                  @default(false)
+  readAt      DateTime?
+  createdAt   DateTime                 @default(now())
+  user        User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, channel, createdAt(sort: Desc)])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model Wallet {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  balance             Int      @default(0)
+  withdrawableBalance Int      @default(0)
+  holdBalance         Int      @default(0)
+  totalEarnings       Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CreditTransaction {
+  id                   String                @id @default(cuid())
+  userId               String
+  quoteRequestId       String?
+  walletTopupPaymentId String?
+  amount               Int
+  type                 CreditTransactionType
+  memo                 String?
+  referenceKey         String?               @unique
+  createdAt            DateTime              @default(now())
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quoteRequest         QuoteRequest?         @relation(fields: [quoteRequestId], references: [id], onDelete: SetNull)
+  walletTopupPayment   WalletTopupPayment?   @relation(fields: [walletTopupPaymentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([quoteRequestId, createdAt(sort: Desc)])
+}
+
+model WalletTopupPayment {
+  id                      String              @id @default(cuid())
+  userId                  String
+  amount                  Int
+  provider                WalletTopupProvider
+  status                  WalletTopupStatus   @default(PENDING)
+  idempotencyKey          String              @unique
+  checkoutSessionId       String?             @unique
+  checkoutUrl             String?
+  providerPaymentId       String?
+  paidEventId             String?             @unique
+  refundedEventId         String?             @unique
+  failureMessage          String?
+  paidAt                  DateTime?
+  creditedAt              DateTime?
+  refundedAt              DateTime?
+  acceptedPaymentPolicy   Boolean             @default(false)
+  paymentPolicyVersion    String?
+  paymentPolicyAcceptedAt DateTime?
+  paymentPolicyIpAddress  String?
+  paymentPolicyUserAgent  String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  user                    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creditTransactions      CreditTransaction[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+}
+
+model Conversation {
+  id          String            @id @default(cuid())
+  customerId  String
+  tradesmanId String
+  quoteId     String?           @unique
+  bookingId   String?           @unique
+  requestId   String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  customer    User              @relation("ConversationCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  tradesman   User              @relation("ConversationTradesman", fields: [tradesmanId], references: [id], onDelete: Cascade)
+  quote       Quote?            @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  booking     Booking?          @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  request     QuoteRequest?     @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  messages    Message[]
+  typingUsers TypingIndicator[]
+
+  @@unique([requestId, tradesmanId])
+  @@index([customerId, updatedAt(sort: Desc)])
+  @@index([tradesmanId, updatedAt(sort: Desc)])
+  @@index([requestId, updatedAt(sort: Desc)])
+}
+
+model Message {
+  id             String            @id @default(cuid())
+  conversationId String
+  senderId       String?
+  senderRole     MessageSenderRole
+  messageType    MessageType
+  content        String
+  imageUrl       String?
+  imageUploadId  String?           @unique
+  fileUrl        String?
+  fileUploadId   String?           @unique
+  fileName       String?
+  fileMimeType   String?
+  fileSizeBytes  Int?
+  createdAt      DateTime          @default(now())
+  readAt         DateTime?
+  conversation   Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User?             @relation("ConversationSender", fields: [senderId], references: [id], onDelete: SetNull)
+  imageUpload    UploadedFile?     @relation("MessageImageUpload", fields: [imageUploadId], references: [id], onDelete: SetNull)
+  fileUpload     UploadedFile?     @relation("MessageFileUpload", fields: [fileUploadId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt])
+  @@index([conversationId, readAt])
+}
+
+model UploadedFile {
+  id                String       @id @default(cuid())
+  bucket            String
+  objectKey         String       @unique
+  publicUrl         String
+  folder            UploadFolder
+  access            UploadAccess @default(PRIVATE)
+  originalFileName  String
+  mimeType          String
+  sizeBytes         Int
+  uploadedById      String
+  createdAt         DateTime     @default(now())
+  uploader          User         @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: Cascade)
+  chatImageMessages Message[]    @relation("MessageImageUpload")
+  chatFileMessages  Message[]    @relation("MessageFileUpload")
+
+  @@index([uploadedById, createdAt])
+  @@index([folder, createdAt])
+}
+
+model TypingIndicator {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  isTyping       Boolean      @default(false)
+  updatedAt      DateTime     @updatedAt
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([conversationId, isTyping, updatedAt])
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  bookingId    String
+  authorId     String
+  targetUserId String
+  rating       Int
+  comment      String
+  photoUrl     String?
+  createdAt    DateTime @default(now())
+  booking      Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  author       User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  targetUser   User     @relation("ReviewTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId, authorId])
+  @@index([targetUserId, rating])
+}
+
+model Dispute {
+  id              String        @id @default(cuid())
+  bookingId       String
+  raisedById      String
+  assignedAdminId String?
+  reason          String
+  resolutionNote  String?
+  status          DisputeStatus @default(OPEN)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  raisedBy        User          @relation("RaisedDisputes", fields: [raisedById], references: [id], onDelete: Cascade)
+  assignedAdmin   User?         @relation("HandledDisputes", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  oneOutCases     OneOutCase[]
+
+  @@index([status, createdAt])
+}
+
+model PlatformCommissionRule {
+  id            String           @id @default(cuid())
+  name          String
+  scope         PlatformFeeScope @default(PLATFORM)
+  feeType       PlatformFeeType  @default(PERCENTAGE)
+  value         Int
+  categoryId    String?
+  serviceId     String?
+  isActive      Boolean          @default(true)
+  effectiveFrom DateTime?
+  effectiveTo   DateTime?
+  note          String?
+  createdById   String
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  category      ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  service       Service?         @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  createdBy     User             @relation("CommissionCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([scope, isActive])
+  @@index([categoryId, isActive])
+  @@index([serviceId, isActive])
+}
+
+model AdminBanner {
+  id             String                 @id @default(cuid())
+  titleKo        String
+  titleFil       String
+  descriptionKo  String?
+  descriptionFil String?
+  ctaLabelKo     String?
+  ctaLabelFil    String?
+  imageUrl       String
+  linkUrl        String?
+  status         AdminPublicationStatus @default(DRAFT)
+  displayOrder   Int                    @default(0)
+  startsAt       DateTime?
+  endsAt         DateTime?
+  createdById    String
+  updatedById    String?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  createdBy      User                   @relation("BannerCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy      User?                  @relation("BannerUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status, displayOrder])
+}
+
+model AdminNotice {
+  id          String                 @id @default(cuid())
+  titleKo     String
+  titleFil    String
+  contentKo   String
+  contentFil  String
+  status      AdminPublicationStatus @default(DRAFT)
+  isPinned    Boolean                @default(false)
+  publishedAt DateTime?
+  expiresAt   DateTime?
+  createdById String
+  updatedById String?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  createdBy   User                   @relation("NoticeCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy   User?                  @relation("NoticeUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status, isPinned])
+}
+
+model TradesmanApprovalRequest {
+  id              String                  @id @default(cuid())
+  profileId       String
+  reviewerAdminId String?
+  status          TradesmanApprovalStatus @default(PENDING)
+  submittedNote   String?
+  reviewNote      String?
+  submittedAt     DateTime                @default(now())
+  reviewedAt      DateTime?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  profile         TradesmanProfile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  reviewerAdmin   User?                   @relation("ApprovalReviewedBy", fields: [reviewerAdminId], references: [id], onDelete: SetNull)
+
+  @@index([status, submittedAt])
+}
+
+model OneOutCase {
+  id                 String           @id @default(cuid())
+  profileId          String
+  bookingId          String?
+  disputeId          String?
+  status             OneOutCaseStatus @default(OPEN)
+  reason             String
+  evidenceUrl        String?
+  strikeCountApplied Int              @default(1)
+  suspensionUntil    DateTime?
+  adminNote          String?
+  handledById        String?
+  handledAt          DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  profile            TradesmanProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  booking            Booking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  dispute            Dispute?         @relation(fields: [disputeId], references: [id], onDelete: SetNull)
+  handledBy          User?            @relation("OneOutHandledBy", fields: [handledById], references: [id], onDelete: SetNull)
+
+  @@index([profileId, status])
+}
