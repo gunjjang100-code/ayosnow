@@ -14,7 +14,7 @@ const prismaSchemaSource = readFileSync(
   "utf8",
 );
 
-test("quote acceptance workflow is guarded by one database transaction", () => {
+test("quote acceptance workflow uses one atomic D1 batch", () => {
   const functionStart = quotesServiceSource.indexOf(
     "export async function selectQuoteForCustomer",
   );
@@ -25,12 +25,10 @@ test("quote acceptance workflow is guarded by one database transaction", () => {
 
   assert.notEqual(functionStart, -1);
   assert.notEqual(nextFunctionStart, -1);
-  assert.match(selectQuoteSource, /prisma\.\$transaction\(\[/);
-  assert.match(selectQuoteSource, /prisma\.\$executeRaw`\s*INSERT INTO "Booking"/);
-  assert.match(selectQuoteSource, /prisma\.conversation\.(update|create)/);
-  assert.match(selectQuoteSource, /prisma\.message\.createMany/);
-  assert.match(selectQuoteSource, /prisma\.notification\.createMany/);
-  assert.doesNotMatch(selectQuoteSource, /deleteMany\(\{ where: \{ id: bookingId \} \}/);
+  assert.match(selectQuoteSource, /executeAtomicD1Batch\(/);
+  assert.match(selectQuoteSource, /buildQuoteSelectionBatch\(/);
+  assert.doesNotMatch(selectQuoteSource, /prisma\.\$transaction/);
+  assert.doesNotMatch(selectQuoteSource, /prisma\.\$executeRaw/);
 });
 
 test("quote acceptance uses D1-compatible batch transactions, not interactive transactions", () => {
@@ -42,7 +40,9 @@ test("quote acceptance uses D1-compatible batch transactions, not interactive tr
   );
   const selectQuoteSource = quotesServiceSource.slice(functionStart, nextFunctionStart);
 
-  assert.doesNotMatch(selectQuoteSource, /\$transaction\(async/);
+  assert.match(selectQuoteSource, /executeAtomicD1Batch/);
+  assert.doesNotMatch(selectQuoteSource, /\$transaction/);
+  assert.match(selectQuoteSource, /shouldSendExternalNotifications/);
 });
 
 test("accepted quote conversation helper finds existing booking or quote conversations", () => {

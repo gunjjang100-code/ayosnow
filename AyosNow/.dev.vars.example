@@ -2,6 +2,10 @@
 # Copy this file to .dev.vars only on your own machine and fill real values there.
 # The production database uses the PUNTAGO_DB D1 binding in wrangler.jsonc.
 # DATABASE_URL is not needed for Cloudflare D1.
+# These HTTP values are only needed when using plain `next dev` instead of `wrangler dev`.
+CLOUDFLARE_D1_TOKEN="replace-with-a-token-that-can-query-d1"
+CLOUDFLARE_ACCOUNT_ID="replace-with-cloudflare-account-id"
+CLOUDFLARE_DATABASE_ID="replace-with-puntago-d1-database-id"
 
 APP_URL="https://puntago.net"
 NEXTAUTH_URL="https://puntago.net"

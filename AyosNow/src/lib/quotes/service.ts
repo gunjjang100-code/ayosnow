@@ -1,6 +1,4 @@
 import {
-  MessageSenderRole,
-  MessageType,
   NotificationChannel,
   NotificationRelatedType,
   NotificationType,
@@ -9,9 +7,11 @@ import {
 } from "@prisma/client";
 import crypto from "node:crypto";
 
+import { executeAtomicD1Batch } from "@/lib/d1/atomic-batch";
 import { AppError } from "@/lib/errors/app-error";
 import { createNotification } from "@/lib/notifications/service";
 import { prisma } from "@/lib/prisma";
+import { buildQuoteSelectionBatch } from "@/lib/quotes/quote-selection-batch";
 import {
   getVisibleProfessionalBadgesForProfiles,
   refreshTradesmanResponseRateAndBadges,
@@ -369,54 +369,15 @@ export async function selectQuoteForCustomer(params: {
     throw new AppError("Another quote has already been selected for this request.", 400);
   }
 
-  if (quote.booking) {
-    const existingConversation = await findAcceptedQuoteConversation({
-      bookingId: quote.booking.id,
-      quoteId: quote.id,
-      quoteRequestId: quote.quoteRequestId,
-      tradesmanId: quote.tradesmanId,
-    });
-
-    const conversationId = existingConversation?.id ?? crypto.randomUUID();
-    await prisma.$transaction([
-      existingConversation
-        ? prisma.conversation.update({
-            where: { id: existingConversation.id },
-            data: {
-              customerId: quote.quoteRequest.customerId,
-              tradesmanId: quote.tradesmanId,
-              bookingId: quote.booking.id,
-              quoteId: quote.id,
-              requestId: quote.quoteRequestId,
-            },
-          })
-        : prisma.conversation.create({
-            data: {
-              id: conversationId,
-              customerId: quote.quoteRequest.customerId,
-              tradesmanId: quote.tradesmanId,
-              bookingId: quote.booking.id,
-              quoteId: quote.id,
-              requestId: quote.quoteRequestId,
-            },
-          }),
-    ]);
-
-    return {
-      bookingId: quote.booking.id,
-      conversationId,
-    };
-  }
-
   // 견적 선택은 "열려 있는 요청"에서만 허용한다.
   // 이미 매칭되거나 닫힌 요청은 새 예약을 만들 수 없다.
-  if (quote.quoteRequest.status !== QuoteRequestStatus.OPEN) {
+  if (!quote.booking && quote.quoteRequest.status !== QuoteRequestStatus.OPEN) {
     throw new AppError("This quote request is already closed and cannot be selected.", 400);
   }
 
   // 아직 대기 중인 견적만 선택 가능하게 제한한다.
   // 이미 수락/거절/철회된 견적을 다시 선택하면 상태 관리가 불안정해진다.
-  if (quote.status !== QuoteStatus.PENDING) {
+  if (!quote.booking && quote.status !== QuoteStatus.PENDING) {
     throw new AppError("This quote cannot be selected in its current status.", 400);
   }
 
@@ -425,7 +386,7 @@ export async function selectQuoteForCustomer(params: {
     quote.quoteRequest.targetDate ??
     new Date(Date.now() + 24 * 60 * 60 * 1000);
   const workAddress = `${quote.quoteRequest.city}, ${quote.quoteRequest.addressLine}`;
-  const bookingId = crypto.randomUUID();
+  const bookingId = quote.booking?.id ?? crypto.randomUUID();
   const existingConversation = await findAcceptedQuoteConversation({
     quoteId: quote.id,
     quoteRequestId: quote.quoteRequestId,
@@ -433,137 +394,61 @@ export async function selectQuoteForCustomer(params: {
   });
   const conversationId = existingConversation?.id ?? crypto.randomUUID();
 
-  await prisma.$transaction([
-    prisma.quoteRequest.updateMany({
-      where: {
-        id: quote.quoteRequestId,
-        status: QuoteRequestStatus.OPEN,
-        OR: [{ selectedQuoteId: null }, { selectedQuoteId: quote.id }],
-      },
-      data: {
-        selectedQuoteId: quote.id,
-        status: QuoteRequestStatus.MATCHED,
-      },
+  await executeAtomicD1Batch(
+    buildQuoteSelectionBatch({
+      quoteId: quote.id,
+      quoteRequestId: quote.quoteRequestId,
+      customerId: quote.quoteRequest.customerId,
+      tradesmanId: quote.tradesmanId,
+      bookingId,
+      conversationId,
+      existingConversationId: existingConversation?.id,
+      scheduledAt: scheduledAt.toISOString(),
+      amount: quote.amount,
+      workAddress,
+      requestTitle: quote.quoteRequest.title,
+      now: new Date().toISOString(),
+      selectedMessageId: crypto.randomUUID(),
+      bookingMessageId: crypto.randomUUID(),
+      tradesmanNotificationId: crypto.randomUUID(),
+      customerNotificationId: crypto.randomUUID(),
     }),
-    prisma.quote.updateMany({
-      where: {
+  );
+
+  const persistedBooking = await prisma.booking.findUnique({
+    where: { quoteId: quote.id },
+  });
+  const persistedConversation = persistedBooking
+    ? await findAcceptedQuoteConversation({
+        bookingId: persistedBooking.id,
+        quoteId: quote.id,
         quoteRequestId: quote.quoteRequestId,
-        id: {
-          not: quote.id,
-        },
-      },
-      data: {
-        status: QuoteStatus.REJECTED,
-      },
-    }),
-    prisma.quote.updateMany({
-      where: {
-        id: quote.id,
-        status: QuoteStatus.PENDING,
-      },
-      data: {
-        status: QuoteStatus.ACCEPTED,
-      },
-    }),
-    prisma.$executeRaw`
-      INSERT INTO "Booking" (
-        "id",
-        "customerId",
-        "tradesmanId",
-        "quoteRequestId",
-        "quoteId",
-        "scheduledAt",
-        "finalAmount",
-        "workAddress",
-        "status",
-        "updatedAt"
-      )
-      SELECT
-        ${bookingId},
-        ${quote.quoteRequest.customerId},
-        ${quote.tradesmanId},
-        ${quote.quoteRequestId},
-        ${quote.id},
-        ${scheduledAt},
-        ${quote.amount},
-        ${workAddress},
-        'PENDING',
-        CURRENT_TIMESTAMP
-      WHERE EXISTS (
-        SELECT 1
-        FROM "QuoteRequest" request
-        JOIN "Quote" selectedQuote ON selectedQuote."id" = ${quote.id}
-        WHERE request."id" = ${quote.quoteRequestId}
-          AND request."status" = 'MATCHED'
-          AND request."selectedQuoteId" = ${quote.id}
-          AND selectedQuote."status" = 'ACCEPTED'
-      )
-    `,
-    existingConversation
-      ? prisma.conversation.update({
-          where: { id: existingConversation.id },
-          data: {
-            customerId: quote.quoteRequest.customerId,
-            tradesmanId: quote.tradesmanId,
-            bookingId,
-            quoteId: quote.id,
-            requestId: quote.quoteRequestId,
-          },
-        })
-      : prisma.conversation.create({
-          data: {
-            id: conversationId,
-            customerId: quote.quoteRequest.customerId,
-            tradesmanId: quote.tradesmanId,
-            bookingId,
-            quoteId: quote.id,
-            requestId: quote.quoteRequestId,
-          },
-        }),
-    prisma.message.createMany({
-      data: [
-        {
-          conversationId,
-          senderRole: MessageSenderRole.SYSTEM,
-          messageType: MessageType.SYSTEM,
-          content: "The customer selected this quote.",
-        },
-        {
-          conversationId,
-          senderRole: MessageSenderRole.SYSTEM,
-          messageType: MessageType.SYSTEM,
-          content: "Booking created.",
-        },
-      ],
-    }),
-    prisma.notification.createMany({
-      data: [
-        {
-          userId: quote.tradesmanId,
-          type: NotificationType.BOOKING_CREATED,
-          title: "The customer selected a quote",
-          message: `${quote.quoteRequest.title} was converted into a booking.`,
-          relatedId: bookingId,
-          relatedType: NotificationRelatedType.BOOKING,
-          channel: NotificationChannel.IN_APP,
-        },
-        {
-          userId: quote.quoteRequest.customerId,
-          type: NotificationType.BOOKING_CREATED,
-          title: "Booking created",
-          message: `${quote.quoteRequest.title} was confirmed as a booking.`,
-          relatedId: bookingId,
-          relatedType: NotificationRelatedType.BOOKING,
-          channel: NotificationChannel.IN_APP,
-        },
-      ],
-    }),
-  ]);
+        tradesmanId: quote.tradesmanId,
+      })
+    : null;
+
+  if (!persistedBooking || !persistedConversation) {
+    const currentRequest = await prisma.quoteRequest.findUnique({
+      where: { id: quote.quoteRequestId },
+      select: { selectedQuoteId: true },
+    });
+
+    if (currentRequest?.selectedQuoteId && currentRequest.selectedQuoteId !== quote.id) {
+      throw new AppError("Another quote has already been selected for this request.", 409);
+    }
+
+    throw new AppError(
+      "The quote could not be selected safely. No partial booking was created.",
+      409,
+    );
+  }
 
   const bookingResult = {
-    bookingId,
-    conversationId,
+    bookingId: persistedBooking.id,
+    conversationId: persistedConversation.id,
   };
+  const shouldSendExternalNotifications =
+    !quote.booking && persistedBooking.id === bookingId;
 
   try {
     const booking = await prisma.booking.findUnique({
@@ -573,7 +458,7 @@ export async function selectQuoteForCustomer(params: {
       },
     });
 
-    if (booking) {
+    if (booking && shouldSendExternalNotifications) {
       await Promise.all([
         createNotification({
           userId: booking.tradesmanId,
