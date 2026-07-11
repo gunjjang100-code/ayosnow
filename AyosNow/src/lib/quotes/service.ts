@@ -142,7 +142,9 @@ export async function listQuoteWorkspaceForCustomer(customerId: string) {
       id: quote.id,
       requestId: request.id,
       tradesmanName: quote.tradesman.fullName,
-      tradesmanSlug: quote.tradesman.fullName.toLowerCase().replace(/\s+/g, "-"),
+      // User IDs are stable and already supported by the public profile route.
+      // Names can change and duplicate names can otherwise create broken links.
+      tradesmanSlug: quote.tradesman.id,
       amountLabel: toMoneyLabel(quote.amount),
       arrivalText: quote.visitDate
         ? quote.visitDate.toISOString()

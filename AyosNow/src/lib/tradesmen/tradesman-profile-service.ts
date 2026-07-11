@@ -50,7 +50,7 @@ export async function getTradesmanProfileBySlug(
   slug: string,
   locale: Locale,
 ): Promise<TradesmanProfileData | null> {
-  const tradesmen = await prisma.user.findMany({
+  const directMatch = await prisma.user.findFirst({
     where: {
       role: UserRole.TRADESMAN,
       status: "ACTIVE",
@@ -63,10 +63,49 @@ export async function getTradesmanProfileBySlug(
           services: {
             some: {
               slug,
+              isPublished: true,
             },
           },
         },
       ],
+    },
+    select: { id: true },
+  });
+
+  let tradesmanId = directMatch?.id ?? null;
+
+  // Keep old name-based links working while new links use the stable user ID.
+  if (!tradesmanId) {
+    const verifiedTradesmen = await prisma.user.findMany({
+      where: {
+        role: UserRole.TRADESMAN,
+        status: "ACTIVE",
+        tradesmanProfile: {
+          isVerified: true,
+        },
+      },
+      select: {
+        id: true,
+        fullName: true,
+      },
+    });
+
+    tradesmanId =
+      verifiedTradesmen.find((candidate) => slugify(candidate.fullName) === slug)?.id ?? null;
+  }
+
+  if (!tradesmanId) {
+    return null;
+  }
+
+  const tradesman = await prisma.user.findFirst({
+    where: {
+      id: tradesmanId,
+      role: UserRole.TRADESMAN,
+      status: "ACTIVE",
+      tradesmanProfile: {
+        isVerified: true,
+      },
     },
     include: {
       tradesmanProfile: {
@@ -102,13 +141,7 @@ export async function getTradesmanProfileBySlug(
         take: 6,
       },
     },
-    take: 50,
   });
-
-  const tradesman =
-    tradesmen.find((item) => item.id === slug) ??
-    tradesmen.find((item) => slugify(item.fullName) === slug) ??
-    tradesmen.find((item) => item.services.some((service) => service.slug === slug));
 
   if (!tradesman || !tradesman.tradesmanProfile) {
     return null;

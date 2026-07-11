@@ -181,6 +181,10 @@ function formatFileSize(bytes: number | null) {
   return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
 }
 
+function hasSameSnapshot<T>(current: T, next: T) {
+  return JSON.stringify(current) === JSON.stringify(next);
+}
+
 export function ChatWorkspace({
   locale,
   text,
@@ -210,6 +214,7 @@ export function ChatWorkspace({
   } | null>(null);
   const [isSending, startSendingTransition] = useTransition();
   const messageEndRef = useRef<HTMLDivElement | null>(null);
+  const conversationListRequestSeqRef = useRef(0);
   const conversationRequestSeqRef = useRef(0);
 
   const activeConversationSummary = useMemo(
@@ -217,13 +222,20 @@ export function ChatWorkspace({
     [activeConversationId, conversations],
   );
 
-  async function refreshConversations() {
+  async function refreshConversations(options: { showLoading?: boolean } = {}) {
     if (!enabled) {
       setIsLoadingList(false);
       return;
     }
 
-    setIsLoadingList(true);
+    const requestSeq = conversationListRequestSeqRef.current + 1;
+    conversationListRequestSeqRef.current = requestSeq;
+    const shouldShowLoading = options.showLoading ?? conversations.length === 0;
+
+    if (shouldShowLoading) {
+      setIsLoadingList(true);
+    }
+
     try {
       const response = await fetch(`/api/conversations?locale=${locale}`, { cache: "no-store" });
       const result = (await response.json().catch(() => null)) as
@@ -234,13 +246,23 @@ export function ChatWorkspace({
           }
         | null;
 
-      if (!response.ok || !result?.conversations) {
-        setErrorMessage(result?.error ?? text.chatLoadError);
-        setIsLoadingList(false);
+      // A slower, older polling response must not overwrite newer conversation data.
+      if (requestSeq !== conversationListRequestSeqRef.current) {
         return;
       }
 
-      setConversations(result.conversations);
+      if (!response.ok || !result?.conversations) {
+        setErrorMessage(result?.error ?? text.chatLoadError);
+        if (shouldShowLoading) {
+          setIsLoadingList(false);
+        }
+        return;
+      }
+
+      const nextConversations = result.conversations;
+      setConversations((current) =>
+        hasSameSnapshot(current, nextConversations) ? current : nextConversations,
+      );
       setErrorMessage(null);
       setIsLoadingList(false);
 
@@ -248,8 +270,14 @@ export function ChatWorkspace({
         setActiveConversationId(result.conversations[0].id);
       }
     } catch {
+      if (requestSeq !== conversationListRequestSeqRef.current) {
+        return;
+      }
+
       setErrorMessage(text.chatLoadError);
-      setIsLoadingList(false);
+      if (shouldShowLoading) {
+        setIsLoadingList(false);
+      }
     }
   }
 
@@ -289,21 +317,30 @@ export function ChatWorkspace({
       return;
     }
 
-    setActiveConversation(result.conversation);
+    const nextConversation = result.conversation;
+    setActiveConversation((current) =>
+      hasSameSnapshot(current, nextConversation) ? current : nextConversation,
+    );
     setErrorMessage(null);
     setIsLoadingConversation(false);
 
-    void fetch(`/api/conversations/${conversationId}/read`, {
-      method: "PATCH",
-    }).then(() => refreshConversations());
+    const hasUnreadIncomingMessage = nextConversation.messages.some(
+      (message) => !message.isMine && message.senderRole !== "system" && !message.readAt,
+    );
+
+    if (hasUnreadIncomingMessage) {
+      void fetch(`/api/conversations/${conversationId}/read`, {
+        method: "PATCH",
+      }).then(() => refreshConversations({ showLoading: false }));
+    }
   }
 
-  const loadConversationsInEffect = useEffectEvent(() => {
+  const loadConversationsInEffect = useEffectEvent((showLoading: boolean) => {
     if (!enabled) {
       return;
     }
 
-    void refreshConversations();
+    void refreshConversations({ showLoading });
   });
 
   const loadConversationInEffect = useEffectEvent((conversationId: string) => {
@@ -329,7 +366,7 @@ export function ChatWorkspace({
       return;
     }
 
-    loadConversationsInEffect();
+    loadConversationsInEffect(true);
   }, [enabled]);
 
   useEffect(() => {
@@ -346,7 +383,7 @@ export function ChatWorkspace({
     }
 
     const interval = window.setInterval(() => {
-      loadConversationsInEffect();
+      loadConversationsInEffect(false);
 
       if (activeConversationId) {
         refreshActiveConversationSilentlyInEffect(activeConversationId);
@@ -503,7 +540,7 @@ export function ChatWorkspace({
       });
       setErrorMessage(null);
       await refreshConversation(activeConversationId);
-      await refreshConversations();
+      await refreshConversations({ showLoading: false });
     });
   }
 
