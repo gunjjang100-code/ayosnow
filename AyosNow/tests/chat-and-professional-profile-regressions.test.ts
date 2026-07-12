@@ -34,3 +34,18 @@ test("old name-based professional profile links remain supported", () => {
   assert.match(profileService, /isVerified: true/);
   assert.match(profileService, /isPublished: true/);
 });
+
+test("accepted quotes keep visible links to their booking and chat", () => {
+  const quoteService = readSource("src/lib/quotes/service.ts");
+  const quoteRequestDetail = readSource("src/app/quote-requests/[id]/page.tsx");
+  const quoteList = readSource("src/app/quotes/page.tsx");
+
+  assert.match(quoteService, /bookingId: quote\.booking\?\.id \?\? null/);
+  assert.match(quoteService, /quote\.booking\?\.conversation\?\.id/);
+
+  for (const page of [quoteRequestDetail, quoteList]) {
+    assert.match(page, /offer\.status === "ACCEPTED"/);
+    assert.match(page, /href=\{`\/bookings\/\$\{offer\.bookingId\}`\}/);
+    assert.match(page, /href=\{`\/chat\?conversationId=\$\{offer\.conversationId\}`\}/);
+  }
+});

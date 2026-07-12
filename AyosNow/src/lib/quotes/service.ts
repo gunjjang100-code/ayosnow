@@ -32,6 +32,8 @@ export interface QuoteWorkspaceOffer {
   rating: number;
   completedJobs: number;
   status: QuoteStatus;
+  bookingId: string | null;
+  conversationId: string | null;
   tradesmanBadges: ProfessionalBadgeSummary[];
 }
 
@@ -109,6 +111,17 @@ export async function listQuoteWorkspaceForCustomer(customerId: string) {
               tradesmanProfile: true,
             },
           },
+          booking: {
+            select: {
+              id: true,
+              conversation: {
+                select: { id: true },
+              },
+            },
+          },
+          conversation: {
+            select: { id: true },
+          },
         },
         orderBy: {
           createdAt: "desc",
@@ -153,6 +166,9 @@ export async function listQuoteWorkspaceForCustomer(customerId: string) {
       rating: quote.tradesman.tradesmanProfile?.averageRating ?? 0,
       completedJobs: quote.tradesman.tradesmanProfile?.completedJobs ?? 0,
       status: quote.status,
+      bookingId: quote.booking?.id ?? null,
+      conversationId:
+        quote.booking?.conversation?.id ?? quote.conversation?.id ?? null,
       tradesmanBadges: quote.tradesman.tradesmanProfile?.id
         ? badgeMap.get(quote.tradesman.tradesmanProfile.id) ?? []
         : [],

@@ -299,6 +299,23 @@ export default async function QuoteRequestDetailPage({
                             rejectConfirmLabel={text.quotesRejectConfirm}
                             selectConfirmLabel={text.quotesSelectConfirm}
                           />
+                        ) : offer.status === "ACCEPTED" &&
+                          offer.bookingId &&
+                          offer.conversationId ? (
+                          <div className="grid w-full gap-2 sm:grid-cols-2 md:w-auto">
+                            <Link
+                              href={`/bookings/${offer.bookingId}`}
+                              className="mobile-secondary-button w-full md:w-auto"
+                            >
+                              {text.bookingsManageButton}
+                            </Link>
+                            <Link
+                              href={`/chat?conversationId=${offer.conversationId}`}
+                              className="mobile-primary-button w-full md:w-auto"
+                            >
+                              {text.quotesChatButton}
+                            </Link>
+                          </div>
                         ) : (
                           <p className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-600">
                             {offer.status === "REJECTED" ? text.quotesRejectedStatus : offer.status}
