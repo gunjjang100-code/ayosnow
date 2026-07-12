@@ -12,13 +12,17 @@ import { AppError } from "@/lib/errors/app-error";
 import { createNotification } from "@/lib/notifications/service";
 import { prisma } from "@/lib/prisma";
 import { buildQuoteSelectionBatch } from "@/lib/quotes/quote-selection-batch";
+import { buildQuoteSubmissionBatch } from "@/lib/quotes/quote-submission-batch";
 import {
   getVisibleProfessionalBadgesForProfiles,
   refreshTradesmanResponseRateAndBadges,
 } from "@/lib/professional-badges/professional-badge-service";
 import { assertVerifiedTradesmanForCustomerWorkflow } from "@/lib/tradesmen/verification-service";
 import type { ProfessionalBadgeSummary } from "@/lib/types";
-import { chargeCreditsForQuoteSubmission, QUOTE_SUBMISSION_CREDIT_COST } from "@/lib/wallets/wallet-service";
+import {
+  ensureWalletForUser,
+  QUOTE_SUBMISSION_CREDIT_COST,
+} from "@/lib/wallets/wallet-service";
 import { buildQuoteSubmissionFeeReferenceKey } from "@/lib/wallets/wallet-topup-config";
 
 export interface QuoteWorkspaceOffer {
@@ -44,15 +48,6 @@ export interface QuoteWorkspaceRequest {
   budgetLabel: string;
   targetDate: string;
   statusLabel: string;
-}
-
-function isUniqueConstraintError(error: unknown) {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code?: string }).code === "P2002"
-  );
 }
 
 function toMoneyLabel(value: number | null | undefined) {
@@ -233,98 +228,64 @@ export async function upsertQuoteForTradesman(params: {
     },
   });
 
-  const quoteData = {
-    amount: Math.round(params.amount),
-    visitDate: params.visitDate ? new Date(params.visitDate) : null,
-    message: params.message.trim(),
-    status: QuoteStatus.PENDING,
-  };
+  await ensureWalletForUser({ userId: params.tradesmanId });
 
-  let savedQuote;
-  let wasCharged = !existingQuote;
+  const quoteId = existingQuote?.id ?? crypto.randomUUID();
+  const feeTransactionId = crypto.randomUUID();
+  const feeReferenceKey = buildQuoteSubmissionFeeReferenceKey({
+    userId: params.tradesmanId,
+    quoteRequestId: quoteRequest.id,
+  });
+  const amount = Math.round(params.amount);
+  const visitDate = params.visitDate ? new Date(params.visitDate).toISOString() : null;
+  const message = params.message.trim();
+  const now = new Date().toISOString();
 
-  if (existingQuote) {
-    savedQuote = await prisma.quote.update({
-      where: { id: existingQuote.id },
-      data: quoteData,
-    });
-  } else {
-    try {
-      savedQuote = await prisma.quote.create({
-        data: {
-          id: crypto.randomUUID(),
+  await executeAtomicD1Batch(
+    buildQuoteSubmissionBatch({
+      quoteId,
+      transactionId: feeTransactionId,
+      quoteRequestId: quoteRequest.id,
+      tradesmanId: params.tradesmanId,
+      amount,
+      visitDate,
+      message,
+      feeAmount: QUOTE_SUBMISSION_CREDIT_COST,
+      feeMemo: `Quote submission fee ${QUOTE_SUBMISSION_CREDIT_COST} PHP · Quote ${quoteId.slice(-6)}`,
+      feeReferenceKey,
+      now,
+    }),
+  );
+
+  const [savedQuote, feeTransaction, wallet] = await Promise.all([
+    prisma.quote.findUnique({
+      where: {
+        quoteRequestId_tradesmanId: {
           quoteRequestId: quoteRequest.id,
           tradesmanId: params.tradesmanId,
-          ...quoteData,
         },
-      });
-    } catch (error) {
-      if (!isUniqueConstraintError(error)) {
-        throw error;
-      }
+      },
+    }),
+    prisma.creditTransaction.findUnique({
+      where: { referenceKey: feeReferenceKey },
+    }),
+    prisma.wallet.findUnique({
+      where: { userId: params.tradesmanId },
+    }),
+  ]);
 
-      // 같은 전문가가 같은 요청에 아주 빠르게 두 번 제출하면 DB unique 제약이 먼저 막는다.
-      // 이때 사용자에게 500 오류를 보여주지 않고, 이미 만들어진 견적을 수정 흐름으로 처리한다.
-      const concurrentQuote = await prisma.quote.findUnique({
-        where: {
-          quoteRequestId_tradesmanId: {
-            quoteRequestId: quoteRequest.id,
-            tradesmanId: params.tradesmanId,
-          },
-        },
-      });
-
-      if (!concurrentQuote) {
-        throw new AppError(
-          "Your quote was submitted at the same time. Please reload and try again.",
-          409,
-        );
-      }
-
-      const feeTransaction = await prisma.creditTransaction.findUnique({
-        where: {
-          referenceKey: buildQuoteSubmissionFeeReferenceKey({
-            userId: params.tradesmanId,
-            quoteRequestId: quoteRequest.id,
-          }),
-        },
-      });
-
-      if (!feeTransaction) {
-        throw new AppError(
-          "Your first quote is still being processed. Please wait a moment and reload.",
-          409,
-        );
-      }
-
-      savedQuote = await prisma.quote.update({
-        where: { id: concurrentQuote.id },
-        data: quoteData,
-      });
-      wasCharged = false;
+  if (!savedQuote || !feeTransaction || !wallet) {
+    if ((wallet?.balance ?? 0) < QUOTE_SUBMISSION_CREDIT_COST) {
+      throw new AppError("Not enough credits. Please top up.", 400);
     }
+
+    throw new AppError(
+      "The quote and credit deduction could not be saved safely. Please try again.",
+      409,
+    );
   }
 
-  let wallet = await prisma.wallet.findUnique({
-    where: { userId: params.tradesmanId },
-  });
-
-  if (wasCharged) {
-    try {
-      wallet = await chargeCreditsForQuoteSubmission({
-        userId: params.tradesmanId,
-        quoteRequestId: quoteRequest.id,
-        quoteId: savedQuote.id,
-        amount: QUOTE_SUBMISSION_CREDIT_COST,
-      });
-    } catch (error) {
-      await prisma.quote.delete({
-        where: { id: savedQuote.id },
-      });
-
-      throw error;
-    }
-  }
+  const wasCharged = feeTransaction.id === feeTransactionId;
 
   try {
     await createNotification({
